@@ -18,19 +18,19 @@ public class Flight {
             ZonedDateTime departureDateTime,
             ZonedDateTime arrivalDateTime,
             double basePrice,
-            FlightStatus status) {
+            FlightStatus status,
+            int capacity) {
         this.flightNumber = flightNumber;
         this.departureDateTime = departureDateTime;
         this.arrivalDateTime = arrivalDateTime;
         this.durationMinutes = (int) DateUtils.zonedDateTimeDifference(departureDateTime, arrivalDateTime,
                 ChronoUnit.SECONDS);
         this.basePrice = basePrice;
-        this.capacity = getCapacity();
+        this.capacity = capacity;
     }
 
-    private int getCapacity() {
-        return 0;
-    }
+    // þurfum við kannski að bæta við plane inn í módelið sem skilgreinir hvernig
+    // vél, hversu mörg sæti o.s.frv.
 
     public static void main(String[] args) {
         ZonedDateTime depDT = ZonedDateTime.of(2026, 9, 9, 18, 0, 0, 0, ZoneId.of("GMT+2"));
