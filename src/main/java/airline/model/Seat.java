@@ -13,6 +13,7 @@ public class Seat {
 
     public Boolean isWindow() {
         // gera is window, hvernig skilgreinum við seatType, kannski enum?
+        // enum er góð hugmynd
         return false;
     }
 
