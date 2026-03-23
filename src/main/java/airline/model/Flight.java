@@ -43,6 +43,8 @@ public class Flight {
         return durationMinutes;
     }
 
+
+
     public static void main(String[] args) {
         ZonedDateTime depDT = ZonedDateTime.of(2026, 9, 9, 18, 0, 0, 0, ZoneId.of("GMT+2"));
 

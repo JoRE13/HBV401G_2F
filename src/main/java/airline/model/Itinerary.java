@@ -8,7 +8,7 @@ public class Itinerary {
     private double totalPrice;
     private List<Flight> legs;
 
-    public void legs(
+    public Itinerary(
             String itineraryId,
             int totalDuration,
             double totalPrice,
