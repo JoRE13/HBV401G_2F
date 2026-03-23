@@ -1,7 +1,9 @@
 package src.main.java.airline.model;
 
-import java.time.*;
 import src.main.java.airline.util.DateUtils;
+
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 
 public class Flight {
@@ -31,6 +33,15 @@ public class Flight {
 
     // þurfum við kannski að bæta við plane inn í módelið sem skilgreinir hvernig
     // vél, hversu mörg sæti o.s.frv.
+
+    //getters
+    public double getBasePrice(){
+        return basePrice;
+    }
+
+    public int getDurationMinutes(){
+        return durationMinutes;
+    }
 
     public static void main(String[] args) {
         ZonedDateTime depDT = ZonedDateTime.of(2026, 9, 9, 18, 0, 0, 0, ZoneId.of("GMT+2"));
