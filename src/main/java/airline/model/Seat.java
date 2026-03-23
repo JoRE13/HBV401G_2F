@@ -2,23 +2,33 @@ package src.main.java.airline.model;
 
 public class Seat {
     private String seatID;
-    private String seatType;
-    private Boolean isAvailable;
+    private SeatType seatType;
+    private boolean isAvailable;
 
-    public void Seat(String seatID, String seatType) {
+    public Seat(String seatID, SeatType seatType) {
         this.seatID = seatID;
-        this.seatType = seatType;
+        this.seatType = SeatType.MIDDLE; //default middle sæti
         this.isAvailable = true;
     }
 
-    public Boolean isWindow() {
+    public boolean isWindow() {
         // gera is window, hvernig skilgreinum við seatType, kannski enum?
         // enum er góð hugmynd
-        return false;
+        return seatType == SeatType.WINDOW;
     }
 
-    public Boolean isAisle() {
+    public boolean isAisle() {
         // gera is aisle, hvernig skilgreinum við seatType, kannski enum?
-        return false;
+        return seatType == SeatType.AISLE;
+    }
+
+    //Taka frá sæti og kanna hvort sé laust:
+
+    public boolean isAvailable(){
+        return isAvailable;
+    }
+
+    public void reserve(){
+        isAvailable = false;
     }
 }
