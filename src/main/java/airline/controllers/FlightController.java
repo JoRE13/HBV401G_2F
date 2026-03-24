@@ -27,7 +27,7 @@ public class FlightController {
         return departing;
     }
 
-    public List <Flight> getArrivingFlight(String airportCode){
+    public List <Flight> getArrivingFlights(String airportCode){
         List<Flight> arriving = new ArrayList<>();
         for(Flight f : flights) {
             if(f.getArrivalAirport().getAirportCode().equals(airportCode)){
@@ -45,7 +45,7 @@ public class FlightController {
         for (Flight f : flights) {
             if (f.getDepartureAirport().getAirportCode().equals(departureCode) &&
                     f.getArrivalAirport().getAirportCode().equals(arrivalCode) &&
-                    f.getDepartureDateTime().equals(date)) {
+                    f.getDepartureDateTime().toLocalDate().equals(date.toLocalDate())) {
                 search.add(f);
             }
         }
@@ -58,7 +58,7 @@ public class FlightController {
         List<Flight> departureSearch = new ArrayList<>();
         for(Flight f : flights) {
             if(f.getDepartureAirport().getAirportCode().equals(airportCode) &&
-            f.getDepartureDateTime().equals(date)){
+            f.getDepartureDateTime().toLocalDate().equals(date.toLocalDate())){
                 departureSearch.add(f);
             }
         }
@@ -66,7 +66,7 @@ public class FlightController {
     }
 
     public List<Flight> filterByDepartureTimeRange(
-            List<Flight> flights,
+            List<Flight> inputFlights,
             ZonedDateTime start,
             ZonedDateTime end){
         List<Flight> filterResult = new ArrayList<>();
@@ -86,14 +86,74 @@ public class FlightController {
 
     public List<Itinerary> findConnectingItineraries(
             String fromCode,
-            String toCode
+            String toCode,
             ZonedDateTime date){
         List<Itinerary> result = new ArrayList<>();
 
+        for (Flight f1 : flights){
+            if (!f1.getDepartureAirport().getAirportCode().equals(fromCode)) continue;
 
+            for (Flight f2 : flights){
+                if (f1.getArrivalAirport().getAirportCode()
+                        .equals(f2.getDepartureAirport().getAirportCode())
+                && f2.getArrivalAirport().getAirportCode().equals(toCode)){
+
+                    List<Flight> legs = new ArrayList<>();
+                    legs.add(f1);
+                    legs.add(f2);
+
+                    Itinerary itin = new Itinerary(
+                            (f1.getFlightNumber() + " - " + f2.getFlightNumber()),
+                            0,
+                            0,
+                            legs);
+
+                    itin.computeTotalDuration();
+                    itin.computeTotalPrice();
+
+                    result.add(itin);
+                }
+            }
+        }
+        return result;
+    }
+
+    //Flug-valkostir
+    public void addFlight(Flight flight){
+        flights.add(flight);
+    }
+
+    public void updateFlight(Flight flight){
+        removeFlight(flight.getFlightNumber());
+        flights.add(flight);
+    }
+
+    public void removeFlight(String flightNumber){
+        flights.removeIf(f -> f.getFlightNumber().equals(flightNumber));
+    }
+
+    public void cancelFlight(String flightNumber){
+        for(Flight f : flights) {
+            if(f.getFlightNumber().equals(flightNumber)){
+                f.setStatusCancelled();
+            }
+        }
+    }
+
+    public void rescheduleFlight(
+            String flightNumber,
+            ZonedDateTime newDepartureTime,
+            ZonedDateTime newArrivalTime){
+        for(Flight f : flights){
+            if (f.getFlightNumber().equals(flightNumber)) {
+                f.reschedule(newDepartureTime, newArrivalTime);
+            }
+        }
     }
 
     public static void main(String[] args) {
 
     }
+
+
 }

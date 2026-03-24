@@ -37,7 +37,7 @@ public class Flight {
         this.departureDateTime = departureDateTime;
         this.arrivalDateTime = arrivalDateTime;
         this.durationMinutes = (int) DateUtils.zonedDateTimeDifference(departureDateTime, arrivalDateTime,
-                ChronoUnit.SECONDS);
+                ChronoUnit.MINUTES);
         this.basePrice = basePrice;
         this.capacity = capacity;
         this.status = FlightStatus.SCHEDULED;
@@ -83,6 +83,15 @@ public class Flight {
         return arrivalDateTime;
     }
 
+    public String getFlightNumber(){
+        return flightNumber;
+    }
+
+    //setters
+    public void setStatusCancelled(){
+        status = FlightStatus.CANCELLED;
+    }
+
     //methods
     public boolean hasDeparted() {
         return status == FlightStatus.DEPARTED;
@@ -90,6 +99,16 @@ public class Flight {
 
     public boolean hasArrived(){
         return status == FlightStatus.ARRIVED;
+    }
+
+    public void reschedule(
+            ZonedDateTime departureDateTime,
+            ZonedDateTime arrivalDateTime){
+        this.departureDateTime = departureDateTime;
+        this.arrivalDateTime = arrivalDateTime;
+
+        this.durationMinutes = (int) DateUtils.zonedDateTimeDifference(departureDateTime, arrivalDateTime,
+                ChronoUnit.MINUTES);
     }
 
     public int getAvailableSeatCount(){
