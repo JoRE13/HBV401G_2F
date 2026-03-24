@@ -2,10 +2,19 @@ package src.main.java.airline.model;
 
 public class Airplane {
     private String type;
-    private int rows;
+    private int numSeats;
 
-    public void Airplane(String type, int rows) {
+    public Airplane(String type, int numSeats) {
         this.type = type;
-        this.rows = rows;
+        this.numSeats = numSeats;
+    }
+
+    //getters
+    public String getType(){
+        return type;
+    }
+
+    public int getNumSeats(){
+        return numSeats;
     }
 }

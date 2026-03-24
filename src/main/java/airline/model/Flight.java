@@ -16,6 +16,8 @@ public class Flight {
     private double basePrice;
     private FlightStatus status;
     private int capacity;
+    private Airport arrivalAirport;
+    private Airplane airplane;
 
     private List<Seat> seats;
 
@@ -26,7 +28,9 @@ public class Flight {
             ZonedDateTime arrivalDateTime,
             double basePrice,
             FlightStatus status,
-            int capacity) {
+            int capacity,
+            Airport arrivalAirport,
+            Airplane airplane) {
         this.flightNumber = flightNumber;
         this.departureDateTime = departureDateTime;
         this.arrivalDateTime = arrivalDateTime;
@@ -35,7 +39,17 @@ public class Flight {
         this.basePrice = basePrice;
         this.capacity = capacity;
         this.status = FlightStatus.SCHEDULED;
+        this.arrivalAirport = arrivalAirport;
+        this.airplane = airplane;
         this.seats = new ArrayList<>();
+
+        //einfaldari útgáfa af sætunum en lokaútgáfa ætti að vera
+        for (int i = 1; i <= airplane.getNumSeats(); i++) {
+            this.seats.add(new Seat("S" + i, SeatType.MIDDLE));
+
+        }
+
+
     }
 
     // þurfum við kannski að bæta við plane inn í módelið sem skilgreinir hvernig
@@ -60,11 +74,11 @@ public class Flight {
     }
 
     public int getAvailableSeatCount(){
-        capacity = 0;
+        int count = 0;
         for(Seat seata : seats){
-            if(seata.isAvailable()) capacity++;
+            if(seata.isAvailable()) count++;
         }
-        return capacity;
+        return count;
     }
 
     public List<Seat> listAvailableSeats(){

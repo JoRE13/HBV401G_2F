@@ -8,7 +8,7 @@ public class Seat {
     //constructor
     public Seat(String seatID, SeatType seatType) {
         this.seatID = seatID;
-        this.seatType = SeatType.MIDDLE; //default middle sæti
+        this.seatType = seatType;
         this.isAvailable = true;
     }
 
