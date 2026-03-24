@@ -17,6 +17,7 @@ public class Flight {
     private FlightStatus status;
     private int capacity;
     private Airport arrivalAirport;
+    private Airport departureAirport;
     private Airplane airplane;
 
     private List<Seat> seats;
@@ -30,6 +31,7 @@ public class Flight {
             FlightStatus status,
             int capacity,
             Airport arrivalAirport,
+            Airport departureAirport,
             Airplane airplane) {
         this.flightNumber = flightNumber;
         this.departureDateTime = departureDateTime;
@@ -40,6 +42,7 @@ public class Flight {
         this.capacity = capacity;
         this.status = FlightStatus.SCHEDULED;
         this.arrivalAirport = arrivalAirport;
+        this.departureAirport = departureAirport;
         this.airplane = airplane;
         this.seats = new ArrayList<>();
 
@@ -62,6 +65,22 @@ public class Flight {
 
     public int getDurationMinutes(){
         return durationMinutes;
+    }
+
+    public Airport getDepartureAirport(){
+        return departureAirport;
+    }
+
+    public Airport getArrivalAirport(){
+        return arrivalAirport;
+    }
+
+    public ZonedDateTime getDepartureDateTime(){
+        return departureDateTime;
+    }
+
+    public ZonedDateTime getArrivalDateTime(){
+        return arrivalDateTime;
     }
 
     //methods
