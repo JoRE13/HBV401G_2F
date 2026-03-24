@@ -5,6 +5,7 @@ public class Seat {
     private SeatType seatType;
     private boolean isAvailable;
 
+    //constructor
     public Seat(String seatID, SeatType seatType) {
         this.seatID = seatID;
         this.seatType = SeatType.MIDDLE; //default middle sæti
