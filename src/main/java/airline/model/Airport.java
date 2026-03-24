@@ -6,6 +6,18 @@ public class Airport {
     private String city;
     private String country;
 
+    //constructor
+    public Airport(
+            String airportCode,
+            String name,
+            String city,
+            String country){
+        this.airportCode = airportCode;
+        this.name = name;
+        this.city = city;
+        this.country = country;
+    }
+
     //getters
     public String getAirportCode(){
         return airportCode;
@@ -21,23 +33,6 @@ public class Airport {
 
     public String getCountry(){
         return  country;
-    }
-
-    //setters
-    public void setAirportCode(){
-        this.airportCode = airportCode;
-    }
-
-    public void setName(){
-        this.name = name;
-    }
-
-    public void setCity(){
-        this.city = city;
-    }
-
-    public void setCountry(){
-        this.country = country;
     }
 
     public static void main(String[] args) {
