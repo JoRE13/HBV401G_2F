@@ -1,18 +1,24 @@
 package airline.controllers;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import airline.repository.MockFlightRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FlightControllerTests {
+    private MockFlightRepository mfr;
 
     @BeforeEach
     void setup() {
-        System.out.println("Byrja");
+        mfr = new MockFlightRepository();
+    }
+
+    @AfterEach
+    void cleanup() {
+        mfr = null;
     }
 
     @Test

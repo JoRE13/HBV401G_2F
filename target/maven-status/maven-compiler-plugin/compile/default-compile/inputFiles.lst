@@ -10,4 +10,6 @@
 /Users/johannesreykdal/Documents/software_development/src/main/java/airline/model/ReservationStatus.java
 /Users/johannesreykdal/Documents/software_development/src/main/java/airline/model/Seat.java
 /Users/johannesreykdal/Documents/software_development/src/main/java/airline/model/SeatType.java
+/Users/johannesreykdal/Documents/software_development/src/main/java/airline/repository/FlightRepository.java
+/Users/johannesreykdal/Documents/software_development/src/main/java/airline/repository/MockFlightRepository.java
 /Users/johannesreykdal/Documents/software_development/src/main/java/airline/util/DateUtils.java

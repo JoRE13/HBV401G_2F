@@ -40,7 +40,7 @@ public class Flight {
                 ChronoUnit.MINUTES);
         this.basePrice = basePrice;
         this.capacity = capacity;
-        this.status = FlightStatus.SCHEDULED;
+        this.status = status;
         this.arrivalAirport = arrivalAirport;
         this.departureAirport = departureAirport;
         this.airplane = airplane;
