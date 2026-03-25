@@ -1,4 +1,4 @@
-package src.main.java.airline.util;
+package airline.util;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;

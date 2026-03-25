@@ -1,7 +1,7 @@
-package src.main.java.airline.controllers;
+package airline.controllers;
 
-import src.main.java.airline.model.Flight;
-import src.main.java.airline.model.Itinerary;
+import airline.model.Flight;
+import airline.model.Itinerary;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -11,36 +11,37 @@ import java.util.List;
 public class FlightController {
     private List<Flight> flights;
 
-    public FlightController(){
+    public FlightController() {
         flights = new ArrayList<>();
     }
 
-    //get departing and arriving flights
+    // get departing and arriving flights
 
-    public List<Flight> getDepartingFlights(String airportCode){
+    public List<Flight> getDepartingFlights(String airportCode) {
         List<Flight> departing = new ArrayList<>();
         for (Flight f : flights) {
-            if (f.getDepartureAirport().getAirportCode().equals(airportCode)){
+            if (f.getDepartureAirport().getAirportCode().equals(airportCode)) {
                 departing.add(f);
             }
         }
         return departing;
     }
 
-    public List <Flight> getArrivingFlights(String airportCode){
+    public List<Flight> getArrivingFlights(String airportCode) {
         List<Flight> arriving = new ArrayList<>();
-        for(Flight f : flights) {
-            if(f.getArrivalAirport().getAirportCode().equals(airportCode)){
-                arriving.add(f);}
+        for (Flight f : flights) {
+            if (f.getArrivalAirport().getAirportCode().equals(airportCode)) {
+                arriving.add(f);
+            }
         }
         return arriving;
     }
 
-    //search methods
+    // search methods
     public List<Flight> searchFlights(
             String departureCode,
             String arrivalCode,
-            ZonedDateTime date){
+            ZonedDateTime date) {
         List<Flight> search = new ArrayList<>();
         for (Flight f : flights) {
             if (f.getDepartureAirport().getAirportCode().equals(departureCode) &&
@@ -54,11 +55,11 @@ public class FlightController {
 
     public List<Flight> searchByDepartureAirport(
             String airportCode,
-            ZonedDateTime date){
+            ZonedDateTime date) {
         List<Flight> departureSearch = new ArrayList<>();
-        for(Flight f : flights) {
-            if(f.getDepartureAirport().getAirportCode().equals(airportCode) &&
-            f.getDepartureDateTime().toLocalDate().equals(date.toLocalDate())){
+        for (Flight f : flights) {
+            if (f.getDepartureAirport().getAirportCode().equals(airportCode) &&
+                    f.getDepartureDateTime().toLocalDate().equals(date.toLocalDate())) {
                 departureSearch.add(f);
             }
         }
@@ -68,35 +69,36 @@ public class FlightController {
     public List<Flight> filterByDepartureTimeRange(
             List<Flight> inputFlights,
             ZonedDateTime start,
-            ZonedDateTime end){
+            ZonedDateTime end) {
         List<Flight> filterResult = new ArrayList<>();
         for (Flight f : flights) {
             ZonedDateTime departure = f.getDepartureDateTime();
-            if (departure.isAfter(start) && departure.isBefore(end)){
+            if (departure.isAfter(start) && departure.isBefore(end)) {
                 filterResult.add(f);
             }
         }
         return filterResult;
     }
 
-    public List<Flight> sortByPrice(List<Flight> flights){
+    public List<Flight> sortByPrice(List<Flight> flights) {
         flights.sort(Comparator.comparingDouble(Flight::getBasePrice));
-    return flights;
+        return flights;
     }
 
     public List<Itinerary> findConnectingItineraries(
             String fromCode,
             String toCode,
-            ZonedDateTime date){
+            ZonedDateTime date) {
         List<Itinerary> result = new ArrayList<>();
 
-        for (Flight f1 : flights){
-            if (!f1.getDepartureAirport().getAirportCode().equals(fromCode)) continue;
+        for (Flight f1 : flights) {
+            if (!f1.getDepartureAirport().getAirportCode().equals(fromCode))
+                continue;
 
-            for (Flight f2 : flights){
+            for (Flight f2 : flights) {
                 if (f1.getArrivalAirport().getAirportCode()
                         .equals(f2.getDepartureAirport().getAirportCode())
-                && f2.getArrivalAirport().getAirportCode().equals(toCode)){
+                        && f2.getArrivalAirport().getAirportCode().equals(toCode)) {
 
                     List<Flight> legs = new ArrayList<>();
                     legs.add(f1);
@@ -118,23 +120,23 @@ public class FlightController {
         return result;
     }
 
-    //Flug-valkostir
-    public void addFlight(Flight flight){
+    // Flug-valkostir
+    public void addFlight(Flight flight) {
         flights.add(flight);
     }
 
-    public void updateFlight(Flight flight){
+    public void updateFlight(Flight flight) {
         removeFlight(flight.getFlightNumber());
         flights.add(flight);
     }
 
-    public void removeFlight(String flightNumber){
+    public void removeFlight(String flightNumber) {
         flights.removeIf(f -> f.getFlightNumber().equals(flightNumber));
     }
 
-    public void cancelFlight(String flightNumber){
-        for(Flight f : flights) {
-            if(f.getFlightNumber().equals(flightNumber)){
+    public void cancelFlight(String flightNumber) {
+        for (Flight f : flights) {
+            if (f.getFlightNumber().equals(flightNumber)) {
                 f.setStatusCancelled();
             }
         }
@@ -143,8 +145,8 @@ public class FlightController {
     public void rescheduleFlight(
             String flightNumber,
             ZonedDateTime newDepartureTime,
-            ZonedDateTime newArrivalTime){
-        for(Flight f : flights){
+            ZonedDateTime newArrivalTime) {
+        for (Flight f : flights) {
             if (f.getFlightNumber().equals(flightNumber)) {
                 f.reschedule(newDepartureTime, newArrivalTime);
             }
@@ -154,6 +156,5 @@ public class FlightController {
     public static void main(String[] args) {
 
     }
-
 
 }

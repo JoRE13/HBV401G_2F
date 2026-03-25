@@ -1,6 +1,6 @@
-package src.main.java.airline.model;
+package airline.model;
 
-import src.main.java.airline.util.DateUtils;
+import airline.util.DateUtils;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
