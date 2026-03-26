@@ -77,13 +77,21 @@ public class InMemoryFlightRepository implements FlightRepository {
 
     @Override
     public void save(Flight flight) {
+        if (findByFlightNumber(flight.getFlightNumber()) != null) {
+            throw new IllegalArgumentException("Flight already exists");
+        }
         flights.add(flight);
     }
 
     @Override
     public void update(Flight flight) {
-        delete(flight.getFlightNumber());
-        flights.add(flight);
+        for (int i = 0; i < flights.size(); i++) {
+            if (flights.get(i).getFlightNumber().equals(flight.getFlightNumber())) {
+                flights.set(i, flight);
+                return;
+            }
+        }
+        throw new IllegalArgumentException("Flight not found: " + flight.getFlightNumber());
     }
 
     @Override

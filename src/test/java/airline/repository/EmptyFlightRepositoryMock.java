@@ -7,8 +7,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Secondary mock used to simulate a storage dependency that has no flights.
- * This supports bonus-style testing with multiple mock behaviors.
+ * A mock implementation of {@link FlightRepository} that simulates an
+ * always-empty data source.
+ *
+ * <p>This mock is used in tests that verify behavior when no flights exist,
+ * such as ensuring controllers return empty results or handle missing data
+ * correctly.</p>
+ *
+ * <p>All query methods return empty collections (or {@code null} where applicable),
+ * and all mutation methods ({@code save}, {@code update}, {@code delete})
+ * are implemented as no-ops.</p>
+ *
+ * <p>This mock is intentionally stateless and ignores all inputs.</p>
  */
 public class EmptyFlightRepositoryMock implements FlightRepository {
 

@@ -125,6 +125,13 @@ public class FlightControllerTests {
                 () -> controller.searchFlights("KEF", "LHR", null));
     }
 
+    // Invalid input: past date should be rejected by controller validation
+    @Test
+    @DisplayName("searchFlights throws when date is in past")
+    void searchFlights_throwsIllegalArgumentException_whenDateIsInPast(){
+        assertThrows(IllegalArgumentException.class, () -> controller.searchFlights("KEF", "LHR", baseDate.minusYears(1)));
+    }
+
     // Time-range filtering should include only flights strictly inside the interval.
     @Test
     @DisplayName("filterByDepartureTimeRange returns flights strictly inside range")
@@ -192,6 +199,15 @@ public class FlightControllerTests {
 
         assertThrows(IllegalArgumentException.class,
                 () -> controller.filterByDepartureTimeRange(input, baseDate.plusHours(9), null));
+    }
+
+    // Invalid Input: dates in the past should be rejected
+    @Test
+    @DisplayName("filterByDepartureTimeRange throws when dates are in past")
+    void filterByDepartureTimeRange_throwsIllegalArgumentException_whenDatesInPast() {
+        List<Flight> input = List.of(f1, f3, f4);
+        assertThrows(IllegalArgumentException.class,
+                () -> controller.filterByDepartureTimeRange(input, baseDate.minusYears(2), baseDate.minusYears(1)));
     }
 
     // Edge case: equal start and end should return an empty result with strict bounds.

@@ -5,6 +5,7 @@ import airline.model.Itinerary;
 import airline.repository.FlightRepository;
 import airline.repository.InMemoryFlightRepository;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -39,25 +40,18 @@ public class FlightController {
             String departureCode,
             String arrivalCode,
             ZonedDateTime date) {
+        ZoneId zone = ZoneId.of("UTC");
         if (departureCode == null || departureCode.isBlank()) {
             throw new IllegalArgumentException("departureCode cannot be null or blank");
         }
         if (arrivalCode == null || arrivalCode.isBlank()) {
             throw new IllegalArgumentException("arrivalCode cannot be null or blank");
         }
-        if (date == null) {
-            throw new IllegalArgumentException("date cannot be null");
+        if (date == null || date.toLocalDate().isBefore(ZonedDateTime.now(zone).toLocalDate())) {
+            throw new IllegalArgumentException("date cannot be null and date cannot be in the past");
         }
 
-        List<Flight> search = new ArrayList<>();
-        for (Flight flight : flightRepository.findAll()) {
-            if (flight.getDepartureAirport().getAirportCode().equals(departureCode)
-                    && flight.getArrivalAirport().getAirportCode().equals(arrivalCode)
-                    && flight.getDepartureDateTime().toLocalDate().equals(date.toLocalDate())) {
-                search.add(flight);
-            }
-        }
-        return search;
+        return flightRepository.findByRouteAndDate(departureCode,arrivalCode,date);
     }
 
     public List<Flight> searchByDepartureAirport(
@@ -70,6 +64,7 @@ public class FlightController {
             List<Flight> inputFlights,
             ZonedDateTime start,
             ZonedDateTime end) {
+        ZoneId zone = ZoneId.of("UTC");
         if (inputFlights == null) {
             throw new IllegalArgumentException("inputFlights cannot be null");
         }
@@ -78,6 +73,9 @@ public class FlightController {
         }
         if (start.isAfter(end)) {
             throw new IllegalArgumentException("start cannot be after end");
+        }
+        if (start.toLocalDate().isBefore(ZonedDateTime.now(zone).toLocalDate())){
+            throw new IllegalArgumentException("dates cannot be in the past");
         }
 
         List<Flight> filterResult = new ArrayList<>();
@@ -150,6 +148,9 @@ public class FlightController {
             flight.setStatusCancelled();
             flightRepository.update(flight);
         }
+        else {
+            throw new IllegalArgumentException("Flight not found: " + flightNumber);
+        }
     }
 
     public void rescheduleFlight(
@@ -160,6 +161,9 @@ public class FlightController {
         if (flight != null) {
             flight.reschedule(newDepartureTime, newArrivalTime);
             flightRepository.update(flight);
+        }
+        else {
+            throw new IllegalArgumentException("Flight not found: " + flightNumber);
         }
     }
 
