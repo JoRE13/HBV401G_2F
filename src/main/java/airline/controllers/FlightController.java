@@ -107,7 +107,7 @@ public class FlightController {
             for (Flight f2 : flights) {
                 if (f1.getArrivalAirport().getAirportCode()
                         .equals(f2.getDepartureAirport().getAirportCode())
-                        && f2.getArrivalAirport().getAirportCode().equals(toCode)) {
+                        && f2.getArrivalAirport().getAirportCode().equals(toCode) && f1.getArrivalDateTime().isBefore(f2.getDepartureDateTime())) {
 
                     List<Flight> legs = new ArrayList<>();
                     legs.add(f1);
