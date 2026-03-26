@@ -95,9 +95,13 @@ public class MockFlightRepository implements FlightRepository {
      * <p>This method is used by tests to set up fixture data.</p>
      *
      * @param flight flight to store
+     * @throws IllegalArgumentException if flight already exists
      */
     @Override
     public void save(Flight flight) {
+        if (findByFlightNumber(flight.getFlightNumber()) != null) {
+            throw new IllegalArgumentException("Flight already exists");
+        }
         flights.add(flight);
     }
 
