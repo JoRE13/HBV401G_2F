@@ -2,39 +2,37 @@ package airline.controllers;
 
 import airline.model.Flight;
 import airline.model.Itinerary;
+import airline.repository.FlightRepository;
+import airline.repository.InMemoryFlightRepository;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 public class FlightController {
-    private List<Flight> flights;
+    private final FlightRepository flightRepository;
 
     public FlightController() {
-        flights = new ArrayList<>();
+        this(new InMemoryFlightRepository());
+    }
+
+    public FlightController(FlightRepository flightRepository) {
+        if (flightRepository == null) {
+            throw new IllegalArgumentException("flightRepository cannot be null");
+        }
+        this.flightRepository = flightRepository;
     }
 
     // get departing and arriving flights
 
     public List<Flight> getDepartingFlights(String airportCode) {
-        List<Flight> departing = new ArrayList<>();
-        for (Flight f : flights) {
-            if (f.getDepartureAirport().getAirportCode().equals(airportCode)) {
-                departing.add(f);
-            }
-        }
-        return departing;
+        return flightRepository.findDepartingFlights(airportCode);
     }
 
     public List<Flight> getArrivingFlights(String airportCode) {
-        List<Flight> arriving = new ArrayList<>();
-        for (Flight f : flights) {
-            if (f.getArrivalAirport().getAirportCode().equals(airportCode)) {
-                arriving.add(f);
-            }
-        }
-        return arriving;
+        return flightRepository.findArrivingFlights(airportCode);
     }
 
     // search methods
@@ -42,36 +40,46 @@ public class FlightController {
             String departureCode,
             String arrivalCode,
             ZonedDateTime date) {
-        List<Flight> search = new ArrayList<>();
-        for (Flight f : flights) {
-            if (f.getDepartureAirport().getAirportCode().equals(departureCode) &&
-                    f.getArrivalAirport().getAirportCode().equals(arrivalCode) &&
-                    f.getDepartureDateTime().toLocalDate().equals(date.toLocalDate())) {
-                search.add(f);
-            }
+        ZoneId zone = ZoneId.of("UTC");
+        if (departureCode == null || departureCode.isBlank()) {
+            throw new IllegalArgumentException("departureCode cannot be null or blank");
         }
-        return search;
+        if (arrivalCode == null || arrivalCode.isBlank()) {
+            throw new IllegalArgumentException("arrivalCode cannot be null or blank");
+        }
+        if (date == null || date.toLocalDate().isBefore(ZonedDateTime.now(zone).toLocalDate())) {
+            throw new IllegalArgumentException("date cannot be null and date cannot be in the past");
+        }
+
+        return flightRepository.findByRouteAndDate(departureCode,arrivalCode,date);
     }
 
     public List<Flight> searchByDepartureAirport(
             String airportCode,
             ZonedDateTime date) {
-        List<Flight> departureSearch = new ArrayList<>();
-        for (Flight f : flights) {
-            if (f.getDepartureAirport().getAirportCode().equals(airportCode) &&
-                    f.getDepartureDateTime().toLocalDate().equals(date.toLocalDate())) {
-                departureSearch.add(f);
-            }
-        }
-        return departureSearch;
+        return flightRepository.findByDepartureAirportAndDate(airportCode, date);
     }
 
     public List<Flight> filterByDepartureTimeRange(
             List<Flight> inputFlights,
             ZonedDateTime start,
             ZonedDateTime end) {
+        ZoneId zone = ZoneId.of("UTC");
+        if (inputFlights == null) {
+            throw new IllegalArgumentException("inputFlights cannot be null");
+        }
+        if (start == null || end == null) {
+            throw new IllegalArgumentException("start and end cannot be null");
+        }
+        if (start.isAfter(end)) {
+            throw new IllegalArgumentException("start cannot be after end");
+        }
+        if (start.toLocalDate().isBefore(ZonedDateTime.now(zone).toLocalDate())){
+            throw new IllegalArgumentException("dates cannot be in the past");
+        }
+
         List<Flight> filterResult = new ArrayList<>();
-        for (Flight f : flights) {
+        for (Flight f : inputFlights) {
             ZonedDateTime departure = f.getDepartureDateTime();
             if (departure.isAfter(start) && departure.isBefore(end)) {
                 filterResult.add(f);
@@ -90,6 +98,7 @@ public class FlightController {
             String toCode,
             ZonedDateTime date) {
         List<Itinerary> result = new ArrayList<>();
+        List<Flight> flights = flightRepository.findAll();
 
         for (Flight f1 : flights) {
             if (!f1.getDepartureAirport().getAirportCode().equals(fromCode))
@@ -98,7 +107,7 @@ public class FlightController {
             for (Flight f2 : flights) {
                 if (f1.getArrivalAirport().getAirportCode()
                         .equals(f2.getDepartureAirport().getAirportCode())
-                        && f2.getArrivalAirport().getAirportCode().equals(toCode)) {
+                        && f2.getArrivalAirport().getAirportCode().equals(toCode) && f1.getArrivalDateTime().isBefore(f2.getDepartureDateTime())) {
 
                     List<Flight> legs = new ArrayList<>();
                     legs.add(f1);
@@ -122,23 +131,25 @@ public class FlightController {
 
     // Flug-valkostir
     public void addFlight(Flight flight) {
-        flights.add(flight);
+        flightRepository.save(flight);
     }
 
     public void updateFlight(Flight flight) {
-        removeFlight(flight.getFlightNumber());
-        flights.add(flight);
+        flightRepository.update(flight);
     }
 
     public void removeFlight(String flightNumber) {
-        flights.removeIf(f -> f.getFlightNumber().equals(flightNumber));
+        flightRepository.delete(flightNumber);
     }
 
     public void cancelFlight(String flightNumber) {
-        for (Flight f : flights) {
-            if (f.getFlightNumber().equals(flightNumber)) {
-                f.setStatusCancelled();
-            }
+        Flight flight = flightRepository.findByFlightNumber(flightNumber);
+        if (flight != null) {
+            flight.setStatusCancelled();
+            flightRepository.update(flight);
+        }
+        else {
+            throw new IllegalArgumentException("Flight not found: " + flightNumber);
         }
     }
 
@@ -146,10 +157,13 @@ public class FlightController {
             String flightNumber,
             ZonedDateTime newDepartureTime,
             ZonedDateTime newArrivalTime) {
-        for (Flight f : flights) {
-            if (f.getFlightNumber().equals(flightNumber)) {
-                f.reschedule(newDepartureTime, newArrivalTime);
-            }
+        Flight flight = flightRepository.findByFlightNumber(flightNumber);
+        if (flight != null) {
+            flight.reschedule(newDepartureTime, newArrivalTime);
+            flightRepository.update(flight);
+        }
+        else {
+            throw new IllegalArgumentException("Flight not found: " + flightNumber);
         }
     }
 
