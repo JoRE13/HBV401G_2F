@@ -71,17 +71,20 @@ public class FlightController {
         if (start == null || end == null) {
             throw new IllegalArgumentException("start and end cannot be null");
         }
-        if (start.isAfter(end)) {
+        if (start.toLocalDate().isAfter(end.toLocalDate())) {
             throw new IllegalArgumentException("start cannot be after end");
         }
         if (start.toLocalDate().isBefore(ZonedDateTime.now(zone).toLocalDate())){
             throw new IllegalArgumentException("dates cannot be in the past");
         }
 
+        ZonedDateTime rangeStart = start.toLocalDate().atStartOfDay(start.getZone());
+        ZonedDateTime rangeEndExclusive = end.toLocalDate().plusDays(1).atStartOfDay(end.getZone());
+
         List<Flight> filterResult = new ArrayList<>();
         for (Flight f : inputFlights) {
             ZonedDateTime departure = f.getDepartureDateTime();
-            if (departure.isAfter(start) && departure.isBefore(end)) {
+            if (!departure.isBefore(rangeStart) && departure.isBefore(rangeEndExclusive)) {
                 filterResult.add(f);
             }
         }
