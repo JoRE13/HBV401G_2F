@@ -1,0 +1,259 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{ragged2e}
+\usepackage{booktabs}
+\usepackage{pdflscape}
+
+\geometry{margin=1in}
+\setlength{\parskip}{0.6em}
+\setlength{\parindent}{0pt}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=blue
+}
+
+\definecolor{codebg}{RGB}{248,248,248}
+\definecolor{codegray}{RGB}{80,80,80}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    backgroundcolor=\color{codebg},
+    frame=single,
+    rulecolor=\color{black!20},
+    breaklines=true,
+    showstringspaces=false,
+    columns=fullflexible,
+    keywordstyle=\color{blue!70!black},
+    commentstyle=\color{green!40!black},
+    stringstyle=\color{orange!60!black}
+}
+
+\setlist[itemize]{
+    leftmargin=1.8em,
+    itemsep=0.25em,
+    topsep=0.25em
+}
+
+\titleformat{\section}
+    {\large\bfseries}
+    {}
+    {0pt}
+    {}
+
+\title{Assignment \#4: Software Tests}
+
+\author{
+Andrea Eiríksdóttir, Jóhannes Reykdal Einarsson, Sigursteinn Óli Þorsteinsson, Sölvi Santos
+}
+
+\date{March 2026}
+
+\begin{document}
+
+\maketitle
+
+\section*{1. Scope}
+This document presents the implemented test fixture and mock objects for one controller component in our system.
+
+Controller under test:
+\begin{itemize}
+    \item \texttt{FlightController}
+\end{itemize}
+
+Methods covered by the fixture:
+\begin{description}[leftmargin=2.5em]
+    \item[\texttt{searchFlights}] \nolinkurl{(String departureCode, String arrivalCode, ZonedDateTime date)}
+    \item[\texttt{filterByDepartureTimeRange}] \nolinkurl{(List<Flight> inputFlights, ZonedDateTime start, ZonedDateTime end)}
+\end{description}
+
+\section*{2. Test Fixture (JUnit)}
+The test fixture is implemented in \texttt{src/test/java/airline/controllers/FlightControllerTests.java}.
+
+It provides:
+\begin{itemize}
+    \item clean setup with \texttt{@BeforeEach}
+    \item clean teardown with \texttt{@AfterEach}
+    \item injection of a mock storage dependency into the controller under test
+    \item deterministic fixture data for repeatable tests
+\end{itemize}
+
+Example fixture setup:
+\begin{lstlisting}[language=Java,caption={Fixture setup and teardown (excerpt)}]
+@BeforeEach
+void setup() {
+    mockFlightRepository = new MockFlightRepository();
+    controller = new FlightController(mockFlightRepository);
+    ...
+    // test data objects created here (f1, f2, f3, f4)
+}
+
+@AfterEach
+void cleanup() {
+    controller = null;
+    mockFlightRepository = null;
+    ...
+}
+\end{lstlisting}
+
+\begin{landscape}
+\section*{3. Test Cases and Expected Results}
+
+\renewcommand{\arraystretch}{1.25}
+
+\begin{longtable}{>{\RaggedRight\arraybackslash\small}p{0.50\linewidth}
+                  >{\RaggedRight\arraybackslash}p{0.18\linewidth}
+                  >{\RaggedRight\arraybackslash}p{0.24\linewidth}}
+\toprule
+\textbf{Test method} & \textbf{Input category} & \textbf{Expected result} \\
+\midrule
+\endfirsthead
+
+\toprule
+\textbf{Test method} & \textbf{Input category} & \textbf{Expected result} \\
+\midrule
+\endhead
+
+\bottomrule
+\endfoot
+
+\nolinkurl{searchFlights_returnsMatchingFlight_whenRouteAndDateMatch}
+& Success case
+& One matching flight returned. \\
+
+\nolinkurl{searchFlights_returnsEmptyList_whenNoFlightsMatch}
+& Unsuccessful search
+& Empty list returned. \\
+
+\nolinkurl{searchFlights_returnsEmptyList_withEmptyRepositoryMock}
+& Bonus mock behavior
+& Empty list returned when storage mock is empty. \\
+
+\nolinkurl{searchFlights_throwsIllegalArgumentException_whenInputIsInvalid}
+& Invalid input (\texttt{departureCode = null})
+& \texttt{IllegalArgumentException}. \\
+
+\nolinkurl{searchFlights_throwsIllegalArgumentException_whenArrivalCodeIsBlank}
+& Invalid input (blank arrival code)
+& \texttt{IllegalArgumentException}. \\
+
+\nolinkurl{searchFlights_throwsIllegalArgumentException_whenDateIsNull}
+& Invalid input (\texttt{date = null})
+& \texttt{IllegalArgumentException}. \\
+
+\nolinkurl{searchFlights_throwsIllegalArgumentException_whenDateIsInPast}
+& Invalid input (date in the past)
+& \texttt{IllegalArgumentException}. \\
+
+\nolinkurl{filterByDepartureTimeRange_returnsFlightsInSelectedDayRange}
+& Success case
+& Flights from selected start day through selected end day are returned. \\
+
+\nolinkurl{filterByDepartureTimeRange_includesWholeDay_whenStartAndEndHaveSameDate}
+& Edge boundary case
+& Same-day range includes all flights on that day. \\
+
+\nolinkurl{filterByDepartureTimeRange_throwsIllegalArgumentException_whenStartDateAfterEndDate}
+& Invalid range
+& \texttt{IllegalArgumentException}. \\
+
+\nolinkurl{filterByDepartureTimeRange_throwsIllegalArgumentException_whenInputListIsNull}
+& Invalid input (\texttt{inputFlights = null})
+& \texttt{IllegalArgumentException}. \\
+
+\nolinkurl{filterByDepartureTimeRange_throwsIllegalArgumentException_whenStartIsNull}
+& Invalid input (\texttt{start = null})
+& \texttt{IllegalArgumentException}. \\
+
+\nolinkurl{filterByDepartureTimeRange_throwsIllegalArgumentException_whenEndIsNull}
+& Invalid input (\texttt{end = null})
+& \texttt{IllegalArgumentException}. \\
+
+\nolinkurl{filterByDepartureTimeRange_throwsIllegalArgumentException_whenDatesInPast}
+& Invalid input (dates in the past)
+& \texttt{IllegalArgumentException}. \\
+
+\nolinkurl{filterByDepartureTimeRange_returnsWholeDay_whenStartEqualsEndDate}
+& Edge case (\texttt{start == end})
+& Full selected day is included. \\
+
+\end{longtable}
+\end{landscape}
+
+\section*{4. Why These Test Cases}
+These tests were selected to cover the controller contract in plausible scenarios:
+\begin{itemize}
+    \item successful behavior with valid input
+    \item unsuccessful behavior with valid input
+    \item invalid input handling
+    \item boundary and edge conditions for day-range filtering
+\end{itemize}
+
+This aligns with the requirement to test a controller method in multiple realistic situations.
+
+\section*{5. Why This Coverage Is Sufficient}
+Coverage is sufficient for Assignment \#4 because:
+\begin{itemize}
+    \item it verifies controller input validation for obvious invalid cases
+    \item it verifies expected output shape and content for successful and unsuccessful searches
+    \item it verifies edge behavior for the tested day-range method
+    \item tests focus on controller behavior, not on internal implementation details of storage
+\end{itemize}
+
+\section*{6. Mock Objects and Simulated Behavior}
+Primary mock:
+\begin{itemize}
+    \item \texttt{MockFlightRepository}
+\end{itemize}
+
+Simulated behavior:
+\begin{itemize}
+    \item returns preconfigured search results for \texttt{findByRouteAndDate}
+    \item does not implement real repository/database search logic
+    \item keeps unrelated interface methods unsupported to remain minimal
+\end{itemize}
+
+Bonus mock with different behavior:
+\begin{itemize}
+    \item \texttt{EmptyFlightRepositoryMock}
+\end{itemize}
+
+Simulated behavior:
+\begin{itemize}
+    \item always behaves as empty storage
+    \item enables testing controller behavior under ``no data available'' conditions
+\end{itemize}
+
+\section*{7. Source Code References}
+\begin{itemize}
+    \item Test fixture: \texttt{src/test/java/airline/controllers/FlightControllerTests.java}
+    \item Mock object: \texttt{src/test/java/airline/repository/MockFlightRepository.java}
+    \item Bonus mock object: \texttt{src/test/java/airline/repository/EmptyFlightRepositoryMock.java}
+\end{itemize}
+
+\newpage
+\section*{Appendix A: Full Test Fixture Source}
+\lstinputlisting[language=Java]{../src/test/java/airline/controllers/FlightControllerTests.java}
+
+\newpage
+\section*{Appendix B: Full Mock Object Source}
+\lstinputlisting[language=Java]{../src/test/java/airline/repository/MockFlightRepository.java}
+
+\newpage
+\section*{Appendix C: Bonus Mock Object Source}
+\lstinputlisting[language=Java]{../src/test/java/airline/repository/EmptyFlightRepositoryMock.java}
+
+\end{document}
+

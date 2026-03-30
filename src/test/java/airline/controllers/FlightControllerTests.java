@@ -54,10 +54,6 @@ public class FlightControllerTests {
         f4 = new Flight("FI201", baseDate.plusHours(9), baseDate.plusHours(12), 130.0,
                 FlightStatus.SCHEDULED, 180, cph, kef, plane);
 
-        mockFlightRepository.save(f1);
-        mockFlightRepository.save(f2);
-        mockFlightRepository.save(f3);
-        mockFlightRepository.save(f4);
     }
 
     // Clears references after each test so state does not leak between tests.
@@ -76,6 +72,8 @@ public class FlightControllerTests {
     @Test
     @DisplayName("searchFlights returns matching flight for route and date")
     void searchFlights_returnsMatchingFlight_whenRouteAndDateMatch() {
+        mockFlightRepository.setRouteAndDateResponse(List.of(f1));
+
         List<Flight> result = controller.searchFlights("KEF", "LHR", baseDate.plusHours(12));
 
         assertEquals(1, result.size());
@@ -86,6 +84,8 @@ public class FlightControllerTests {
     @Test
     @DisplayName("searchFlights returns empty list when there is no match")
     void searchFlights_returnsEmptyList_whenNoFlightsMatch() {
+        mockFlightRepository.setRouteAndDateResponse(List.of());
+
         List<Flight> result = controller.searchFlights("KEF", "LHR", baseDate.plusDays(2));
 
         assertEquals(0, result.size());
@@ -132,42 +132,45 @@ public class FlightControllerTests {
         assertThrows(IllegalArgumentException.class, () -> controller.searchFlights("KEF", "LHR", baseDate.minusYears(1)));
     }
 
-    // Time-range filtering should include only flights strictly inside the interval.
+    // Day-range filtering interprets start/end as calendar days.
     @Test
-    @DisplayName("filterByDepartureTimeRange returns flights strictly inside range")
-    void filterByDepartureTimeRange_returnsFlightsStrictlyInsideRange() {
+    @DisplayName("filterByDepartureTimeRange returns flights in selected day range")
+    void filterByDepartureTimeRange_returnsFlightsInSelectedDayRange() {
         List<Flight> input = List.of(f1, f2, f3, f4);
         ZonedDateTime start = baseDate.plusHours(9);
         ZonedDateTime end = baseDate.plusHours(12);
 
         List<Flight> result = controller.filterByDepartureTimeRange(input, start, end);
 
-        assertEquals(2, result.size());
+        assertEquals(3, result.size());
         assertEquals("FI100", result.get(0).getFlightNumber());
         assertEquals("FI200", result.get(1).getFlightNumber());
+        assertEquals("FI201", result.get(2).getFlightNumber());
     }
 
-    // Boundary case: flights exactly at range start/end are excluded (strict comparison).
+    // Same-day range should include whole selected day even if times differ.
     @Test
-    @DisplayName("filterByDepartureTimeRange excludes flights at start and end boundary")
-    void filterByDepartureTimeRange_excludesFlightsAtStartAndEndBoundary() {
+    @DisplayName("filterByDepartureTimeRange includes whole day when start and end are same date")
+    void filterByDepartureTimeRange_includesWholeDay_whenStartAndEndHaveSameDate() {
         List<Flight> input = List.of(f1, f3, f4);
         ZonedDateTime start = baseDate.plusHours(9);
         ZonedDateTime end = baseDate.plusHours(11);
 
         List<Flight> result = controller.filterByDepartureTimeRange(input, start, end);
 
-        assertEquals(1, result.size());
+        assertEquals(3, result.size());
         assertEquals("FI100", result.get(0).getFlightNumber());
+        assertEquals("FI200", result.get(1).getFlightNumber());
+        assertEquals("FI201", result.get(2).getFlightNumber());
     }
 
-    // Invalid range: start after end should throw an exception.
+    // Invalid range: start date after end date should throw an exception.
     @Test
-    @DisplayName("filterByDepartureTimeRange throws when start is after end")
-    void filterByDepartureTimeRange_throwsIllegalArgumentException_whenStartAfterEnd() {
+    @DisplayName("filterByDepartureTimeRange throws when start date is after end date")
+    void filterByDepartureTimeRange_throwsIllegalArgumentException_whenStartDateAfterEndDate() {
         List<Flight> input = List.of(f1, f3, f4);
-        ZonedDateTime start = baseDate.plusHours(12);
-        ZonedDateTime end = baseDate.plusHours(9);
+        ZonedDateTime start = baseDate.plusDays(2).plusHours(12);
+        ZonedDateTime end = baseDate.plusDays(1).plusHours(9);
 
         assertThrows(IllegalArgumentException.class,
                 () -> controller.filterByDepartureTimeRange(input, start, end));
@@ -210,16 +213,19 @@ public class FlightControllerTests {
                 () -> controller.filterByDepartureTimeRange(input, baseDate.minusYears(2), baseDate.minusYears(1)));
     }
 
-    // Edge case: equal start and end should return an empty result with strict bounds.
+    // Edge case: equal start/end date should include the entire selected day.
     @Test
-    @DisplayName("filterByDepartureTimeRange returns empty list when start equals end")
-    void filterByDepartureTimeRange_returnsEmptyList_whenStartEqualsEnd() {
+    @DisplayName("filterByDepartureTimeRange returns whole day when start equals end date")
+    void filterByDepartureTimeRange_returnsWholeDay_whenStartEqualsEndDate() {
         List<Flight> input = List.of(f1, f2, f3, f4);
         ZonedDateTime pointInTime = baseDate.plusHours(10);
 
         List<Flight> result = controller.filterByDepartureTimeRange(input, pointInTime, pointInTime);
 
-        assertEquals(0, result.size());
+        assertEquals(3, result.size());
+        assertEquals("FI100", result.get(0).getFlightNumber());
+        assertEquals("FI200", result.get(1).getFlightNumber());
+        assertEquals("FI201", result.get(2).getFlightNumber());
     }
 }
 
