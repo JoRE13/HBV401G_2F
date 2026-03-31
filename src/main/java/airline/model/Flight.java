@@ -18,11 +18,11 @@ public class Flight {
     private int capacity;
     private Airport arrivalAirport;
     private Airport departureAirport;
-    private Airplane airplane;
+    private String airplaneType;
 
     private List<Seat> seats;
 
-    //constructor
+    // constructor
     public Flight(
             String flightNumber,
             ZonedDateTime departureDateTime,
@@ -32,117 +32,138 @@ public class Flight {
             int capacity,
             Airport arrivalAirport,
             Airport departureAirport,
-            Airplane airplane) {
+            String airplaneType) {
         this.flightNumber = flightNumber;
         this.departureDateTime = departureDateTime;
         this.arrivalDateTime = arrivalDateTime;
-        this.durationMinutes = (int) DateUtils.zonedDateTimeDifference(departureDateTime, arrivalDateTime,
-                ChronoUnit.MINUTES);
+        this.durationMinutes = (int) DateUtils.zonedDateTimeDifference(
+                departureDateTime,
+                arrivalDateTime,
+                ChronoUnit.MINUTES
+        );
         this.basePrice = basePrice;
         this.capacity = capacity;
         this.status = status;
         this.arrivalAirport = arrivalAirport;
         this.departureAirport = departureAirport;
-        this.airplane = airplane;
+        this.airplaneType = (airplaneType == null || airplaneType.isBlank()) ? "UNSPECIFIED" : airplaneType;
         this.seats = new ArrayList<>();
 
-        //einfaldari útgáfa af sætunum en lokaútgáfa ætti að vera
-        for (int i = 1; i <= airplane.getNumSeats(); i++) {
+        // einfaldari utgafa af saetunum en lokautgafa aetti ad vera
+        for (int i = 1; i <= capacity; i++) {
             this.seats.add(new Seat("S" + i, SeatType.MIDDLE));
-
         }
-
-
     }
 
-    // þurfum við kannski að bæta við plane inn í módelið sem skilgreinir hvernig
-    // vél, hversu mörg sæti o.s.frv.
-
-    //getters
-    public double getBasePrice(){
+    // getters
+    public double getBasePrice() {
         return basePrice;
     }
 
-    public int getDurationMinutes(){
+    public FlightStatus getStatus() {
+        return status;
+    }
+
+    public int getCapacity() {
+        return capacity;
+    }
+
+    public String getAirplaneType() {
+        return airplaneType;
+    }
+
+    public int getDurationMinutes() {
         return durationMinutes;
     }
 
-    public Airport getDepartureAirport(){
+    public Airport getDepartureAirport() {
         return departureAirport;
     }
 
-    public Airport getArrivalAirport(){
+    public Airport getArrivalAirport() {
         return arrivalAirport;
     }
 
-    public ZonedDateTime getDepartureDateTime(){
+    public ZonedDateTime getDepartureDateTime() {
         return departureDateTime;
     }
 
-    public ZonedDateTime getArrivalDateTime(){
+    public ZonedDateTime getArrivalDateTime() {
         return arrivalDateTime;
     }
 
-    public String getFlightNumber(){
+    public String getFlightNumber() {
         return flightNumber;
     }
 
-    //setters
-    public void setStatusCancelled(){
+    // setters
+    public void setStatusCancelled() {
         status = FlightStatus.CANCELLED;
     }
 
-    //methods
+    // methods
     public boolean hasDeparted() {
         return status == FlightStatus.DEPARTED;
     }
 
-    public boolean hasArrived(){
+    public boolean hasArrived() {
         return status == FlightStatus.ARRIVED;
     }
 
     public void reschedule(
             ZonedDateTime departureDateTime,
-            ZonedDateTime arrivalDateTime){
+            ZonedDateTime arrivalDateTime) {
         this.departureDateTime = departureDateTime;
         this.arrivalDateTime = arrivalDateTime;
 
-        this.durationMinutes = (int) DateUtils.zonedDateTimeDifference(departureDateTime, arrivalDateTime,
-                ChronoUnit.MINUTES);
+        this.durationMinutes = (int) DateUtils.zonedDateTimeDifference(
+                departureDateTime,
+                arrivalDateTime,
+                ChronoUnit.MINUTES
+        );
     }
 
-    public int getAvailableSeatCount(){
+    public int getAvailableSeatCount() {
         int count = 0;
-        for(Seat seata : seats){
-            if(seata.isAvailable()) count++;
+        for (Seat seat : seats) {
+            if (seat.isAvailable()) {
+                count++;
+            }
         }
         return count;
     }
 
-    public List<Seat> listAvailableSeats(){
+    public List<Seat> listAvailableSeats() {
         List<Seat> available = new ArrayList<>();
         for (Seat seat : seats) {
-            if(seat.isAvailable()) available.add(seat);
+            if (seat.isAvailable()) {
+                available.add(seat);
+            }
         }
         return available;
     }
 
-    public boolean isDirectTo(Airport arrivalAirport){
-        return true;
+    public boolean isDirectTo(Airport arrivalAirport) {
+        if (arrivalAirport == null) {
+            return false;
+        }
+        if (this.arrivalAirport == null
+                || this.arrivalAirport.getAirportCode() == null
+                || arrivalAirport.getAirportCode() == null) {
+            return false;
+        }
+        return this.arrivalAirport.getAirportCode().equalsIgnoreCase(arrivalAirport.getAirportCode());
     }
 
-    public double calculatePrice(int numPassengers){
+    public double calculatePrice(int numPassengers) {
         return basePrice * numPassengers;
     }
 
-    public void addSeat(Seat seat){
+    public void addSeat(Seat seat) {
         seats.add(seat);
     }
 
-
-
     public static void main(String[] args) {
         ZonedDateTime depDT = ZonedDateTime.of(2026, 9, 9, 18, 0, 0, 0, ZoneId.of("GMT+2"));
-
     }
 }

@@ -1,15 +1,23 @@
 package airline.model;
 
 public class Seat {
-    private String seatID;
+    private String seatId;
     private SeatType seatType;
     private boolean isAvailable;
 
-    //constructor
-    public Seat(String seatID, SeatType seatType) {
-        this.seatID = seatID;
+    // constructor
+    public Seat(String seatId, SeatType seatType) {
+        this.seatId = seatId;
         this.seatType = seatType;
         this.isAvailable = true;
+    }
+
+    public String getSeatId() {
+        return seatId;
+    }
+
+    public SeatType getSeatType() {
+        return seatType;
     }
 
     public boolean isWindow() {
@@ -23,13 +31,17 @@ public class Seat {
         return seatType == SeatType.AISLE;
     }
 
-    //Taka frá sæti og kanna hvort sé laust:
-
-    public boolean isAvailable(){
+    // Taka frá sæti og kanna hvort sé laust:
+    public boolean isAvailable() {
         return isAvailable;
     }
 
-    public void reserve(){
+    public void reserve() {
         isAvailable = false;
+    }
+
+    // gera sæti laust aftur
+    public void release() {
+        isAvailable = true;
     }
 }
