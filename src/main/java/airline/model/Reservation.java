@@ -16,7 +16,7 @@ public class Reservation {
             double totalPrice){
         this.reservationCode = reservationCode;
         this.createdAt = createdAt;
-        this.status = ReservationStatus.PENDING; //pending í upphafi reservation
+        this.status = (status == null) ? ReservationStatus.PENDING : status;
         this.totalPrice = totalPrice;
     }
 
@@ -29,12 +29,16 @@ public class Reservation {
         return createdAt;
     }
 
-    public ReservationStatus status(){
+    public ReservationStatus getStatus(){
         return status;
     }
 
     public double getTotalPrice(){
         return totalPrice;
+    }
+
+    public void setTotalPrice(double totalPrice) {
+        this.totalPrice = totalPrice;
     }
 
     //methods

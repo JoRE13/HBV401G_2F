@@ -3,12 +3,15 @@ package airline.model;
 public class ReservationItem {
     private String itemId;
     private double pricePaid;
+    private String passengerEmail;
 
     public ReservationItem(
             String itemId,
-            double pricePaid){
+            double pricePaid,
+            String passengerEmail){
         this.itemId = itemId;
         this.pricePaid = pricePaid;
+        this.passengerEmail = passengerEmail;
     }
 
     //getters
@@ -20,12 +23,21 @@ public class ReservationItem {
         return pricePaid;
     }
 
+    public String getPassengerEmail() {
+        return passengerEmail;
+    }
+
     //setters
     public void setItemId(String itemId){
         this.itemId = itemId;
     }
+
     public void setPricePaid(double pricePaid) {
         this.pricePaid = pricePaid;
+    }
+
+    public void setPassengerEmail(String passengerEmail) {
+        this.passengerEmail = passengerEmail;
     }
 
     public static void main(String[] args) {

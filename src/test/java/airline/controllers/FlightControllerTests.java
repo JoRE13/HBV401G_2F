@@ -1,6 +1,5 @@
 package airline.controllers;
 
-import airline.model.Airplane;
 import airline.model.Airport;
 import airline.model.Flight;
 import airline.model.FlightStatus;
@@ -40,19 +39,19 @@ public class FlightControllerTests {
         Airport kef = new Airport("KEF", "Keflavik", "Reykjanesbaer", "Iceland");
         Airport lhr = new Airport("LHR", "Heathrow", "London", "UK");
         Airport cph = new Airport("CPH", "Kastrup", "Copenhagen", "Denmark");
-        Airplane plane = new Airplane("B737", 180);
+        String airplaneType = "B737";
 
         ZoneId zone = ZoneId.of("UTC");
         baseDate = ZonedDateTime.of(2026, 4, 1, 0, 0, 0, 0, zone);
 
         f1 = new Flight("FI100", baseDate.plusHours(10), baseDate.plusHours(13), 100.0,
-                FlightStatus.SCHEDULED, 180, lhr, kef, plane);
+                FlightStatus.SCHEDULED, 180, lhr, kef, airplaneType);
         f2 = new Flight("FI101", baseDate.plusDays(1).plusHours(10), baseDate.plusDays(1).plusHours(13), 110.0,
-                FlightStatus.SCHEDULED, 180, lhr, kef, plane);
+                FlightStatus.SCHEDULED, 180, lhr, kef, airplaneType);
         f3 = new Flight("FI200", baseDate.plusHours(11), baseDate.plusHours(14), 120.0,
-                FlightStatus.SCHEDULED, 180, cph, kef, plane);
+                FlightStatus.SCHEDULED, 180, cph, kef, airplaneType);
         f4 = new Flight("FI201", baseDate.plusHours(9), baseDate.plusHours(12), 130.0,
-                FlightStatus.SCHEDULED, 180, cph, kef, plane);
+                FlightStatus.SCHEDULED, 180, cph, kef, airplaneType);
 
     }
 
