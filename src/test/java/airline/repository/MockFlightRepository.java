@@ -9,8 +9,8 @@ import java.util.List;
 /**
  * Minimal mock implementation of {@link FlightRepository} for controller tests.
  *
- * <p>This mock does not implement real repository or database logic.
- * It only returns preconfigured values needed by tests.</p>
+ * This mock does not implement real repository or database logic.
+ * It only returns preconfigured values needed by tests.
  */
 public class MockFlightRepository implements FlightRepository {
     private List<Flight> routeAndDateResponse = new ArrayList<>();
