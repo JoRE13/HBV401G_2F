@@ -237,6 +237,31 @@ public class JdbcReservationRepository implements ReservationRepository {
         }
     }
 
+    @Override
+    public boolean hasSeatAssignment(String reservationCode, String itemId, String flightNumber) {
+        String sql = """
+                SELECT 1
+                FROM reservation_item_flights rif
+                JOIN reservation_items ri
+                  ON ri.item_id = rif.item_id
+                WHERE ri.reservation_code = ?
+                  AND rif.item_id = ?
+                  AND rif.flight_number = ?
+                LIMIT 1
+                """;
+        try (Connection connection = connectionFactory.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, reservationCode);
+            statement.setString(2, itemId);
+            statement.setString(3, flightNumber);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next();
+            }
+        } catch (SQLException e) {
+            throw dataAccess("hasSeatAssignment", e);
+        }
+    }
+
     private void bindReservation(PreparedStatement statement, Reservation reservation, boolean forUpdate)
             throws SQLException {
         Timestamp createdAt = new Timestamp(reservation.getCreatedAt().getTime());

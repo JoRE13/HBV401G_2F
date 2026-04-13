@@ -157,9 +157,9 @@ void cleanup() {
 & Invalid input (date in the past)
 & \texttt{IllegalArgumentException}. \\
 
-\nolinkurl{filterByDepartureTimeRange_returnsFlightsInSelectedDayRange}
+\nolinkurl{filterByDepartureTimeRange_returnsFlightsAcrossSelectedDateInterval}
 & Success case
-& Flights from selected start day through selected end day are returned. \\
+& Flights from all selected dates in the interval are returned. \\
 
 \nolinkurl{filterByDepartureTimeRange_includesWholeDay_whenStartAndEndHaveSameDate}
 & Edge boundary case
@@ -192,27 +192,7 @@ void cleanup() {
 \end{longtable}
 \end{landscape}
 
-\section*{4. Why These Test Cases}
-These tests were selected to cover the controller contract in plausible scenarios:
-\begin{itemize}
-    \item successful behavior with valid input
-    \item unsuccessful behavior with valid input
-    \item invalid input handling
-    \item boundary and edge conditions for day-range filtering
-\end{itemize}
-
-This aligns with the requirement to test a controller method in multiple realistic situations.
-
-\section*{5. Why This Coverage Is Sufficient}
-Coverage is sufficient for Assignment \#4 because:
-\begin{itemize}
-    \item it verifies controller input validation for obvious invalid cases
-    \item it verifies expected output shape and content for successful and unsuccessful searches
-    \item it verifies edge behavior for the tested day-range method
-    \item tests focus on controller behavior, not on internal implementation details of storage
-\end{itemize}
-
-\section*{6. Mock Objects and Simulated Behavior}
+\section*{4. Mock Objects and Simulated Behavior}
 Primary mock:
 \begin{itemize}
     \item \texttt{MockFlightRepository}
@@ -236,7 +216,7 @@ Simulated behavior:
     \item enables testing controller behavior under ``no data available'' conditions
 \end{itemize}
 
-\section*{7. Source Code References}
+\section*{5. Source Code References}
 \begin{itemize}
     \item Test fixture: \texttt{src/test/java/airline/controllers/FlightControllerTests.java}
     \item Mock object: \texttt{src/test/java/airline/repository/MockFlightRepository.java}

@@ -12,6 +12,7 @@ import airline.repository.ReservationRepository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -110,15 +111,38 @@ public class ReservationController {
         }
         Reservation reservation = requireReservation(reservationCode);
         requirePending(reservation, "assign seat");
-        reservationRepository.assignSeat(reservationCode, itemId, flightNumber, seatId);
+        String normalizedSeatId = normalizeAndValidateSeatId(flightNumber, seatId);
+        reservationRepository.assignSeat(reservationCode, itemId, flightNumber, normalizedSeatId);
     }
 
     public void confirmReservation(String reservationCode) {
         Reservation reservation = requireReservation(reservationCode);
         requirePending(reservation, "confirm reservation");
-        if (reservationRepository.findItemsByReservation(reservationCode).isEmpty()) {
+        List<ReservationItem> items = reservationRepository.findItemsByReservation(reservationCode);
+        if (items.isEmpty()) {
             throw new IllegalStateException("Cannot confirm reservation without passengers/items: " + reservationCode);
         }
+        List<String> flightNumbers = reservationRepository.findFlightNumbersByReservation(reservationCode);
+        if (flightNumbers.isEmpty()) {
+            throw new IllegalStateException("Cannot confirm reservation without flight legs: " + reservationCode);
+        }
+
+        for (ReservationItem item : items) {
+            for (String flightNumber : flightNumbers) {
+                boolean assigned = reservationRepository.hasSeatAssignment(
+                        reservationCode,
+                        item.getItemId(),
+                        flightNumber
+                );
+                if (!assigned) {
+                    throw new IllegalStateException(
+                            "Cannot confirm reservation; missing seat assignment for item "
+                                    + item.getItemId() + " on flight " + flightNumber
+                    );
+                }
+            }
+        }
+
         reservation.confirmReservation();
         reservationRepository.update(reservation);
     }
@@ -181,5 +205,32 @@ public class ReservationController {
                     "Cannot " + action + " when reservation status is " + reservation.getStatus()
             );
         }
+    }
+
+    private String normalizeAndValidateSeatId(String flightNumber, String seatId) {
+        Flight flight = flightRepository.findByFlightNumber(flightNumber);
+        if (flight == null) {
+            throw new IllegalArgumentException("Flight not found: " + flightNumber);
+        }
+
+        String normalized = seatId.trim().toUpperCase(Locale.ROOT);
+        if (normalized.length() < 2 || normalized.charAt(0) != 'S') {
+            throw new IllegalArgumentException("seatId must be in format S<number>, for example S12");
+        }
+
+        int seatNumber;
+        try {
+            seatNumber = Integer.parseInt(normalized.substring(1));
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("seatId must be in format S<number>, for example S12");
+        }
+
+        if (seatNumber < 1 || seatNumber > flight.getCapacity()) {
+            throw new IllegalArgumentException(
+                    "seatId out of range for flight " + flightNumber + ": "
+                            + normalized + " (capacity " + flight.getCapacity() + ")"
+            );
+        }
+        return normalized;
     }
 }

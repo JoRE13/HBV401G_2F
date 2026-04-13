@@ -1,6 +1,7 @@
 package airline.controllers;
 
 import airline.model.Flight;
+import airline.model.FlightStatus;
 import airline.model.Itinerary;
 import airline.repository.FlightRepository;
 import airline.repository.InMemoryFlightRepository;
@@ -51,13 +52,15 @@ public class FlightController {
             throw new IllegalArgumentException("date cannot be null and date cannot be in the past");
         }
 
-        return flightRepository.findByRouteAndDate(departureCode,arrivalCode,date);
+        List<Flight> candidates = flightRepository.findByRouteAndDate(departureCode, arrivalCode, date);
+        return filterBookableFlights(candidates);
     }
 
     public List<Flight> searchByDepartureAirport(
             String airportCode,
             ZonedDateTime date) {
-        return flightRepository.findByDepartureAirportAndDate(airportCode, date);
+        List<Flight> candidates = flightRepository.findByDepartureAirportAndDate(airportCode, date);
+        return filterBookableFlights(candidates);
     }
 
     public List<Flight> filterByDepartureTimeRange(
@@ -104,10 +107,16 @@ public class FlightController {
         List<Flight> flights = flightRepository.findAll();
 
         for (Flight f1 : flights) {
+            if (!isBookableForSearch(f1)) {
+                continue;
+            }
             if (!f1.getDepartureAirport().getAirportCode().equals(fromCode))
                 continue;
 
             for (Flight f2 : flights) {
+                if (!isBookableForSearch(f2)) {
+                    continue;
+                }
                 if (f1.getArrivalAirport().getAirportCode()
                         .equals(f2.getDepartureAirport().getAirportCode())
                         && f2.getArrivalAirport().getAirportCode().equals(toCode) && f1.getArrivalDateTime().isBefore(f2.getDepartureDateTime())) {
@@ -172,6 +181,24 @@ public class FlightController {
 
     public static void main(String[] args) {
 
+    }
+
+    private List<Flight> filterBookableFlights(List<Flight> flights) {
+        List<Flight> filtered = new ArrayList<>();
+        for (Flight flight : flights) {
+            if (isBookableForSearch(flight)) {
+                filtered.add(flight);
+            }
+        }
+        return filtered;
+    }
+
+    private boolean isBookableForSearch(Flight flight) {
+        if (flight == null) {
+            return false;
+        }
+        return flight.getStatus() == FlightStatus.SCHEDULED
+                || flight.getStatus() == FlightStatus.DELAYED;
     }
 
 }

@@ -42,7 +42,7 @@ public class FlightControllerTests {
         String airplaneType = "B737";
 
         ZoneId zone = ZoneId.of("UTC");
-        baseDate = ZonedDateTime.of(2026, 4, 1, 0, 0, 0, 0, zone);
+        baseDate = ZonedDateTime.now(zone).plusDays(10).toLocalDate().atStartOfDay(zone);
 
         f1 = new Flight("FI100", baseDate.plusHours(10), baseDate.plusHours(13), 100.0,
                 FlightStatus.SCHEDULED, 180, lhr, kef, airplaneType);
@@ -131,20 +131,21 @@ public class FlightControllerTests {
         assertThrows(IllegalArgumentException.class, () -> controller.searchFlights("KEF", "LHR", baseDate.minusYears(1)));
     }
 
-    // Day-range filtering interprets start/end as calendar days.
+    // Primary success case: multi-day slider interval should include all flights on selected dates.
     @Test
-    @DisplayName("filterByDepartureTimeRange returns flights in selected day range")
-    void filterByDepartureTimeRange_returnsFlightsInSelectedDayRange() {
+    @DisplayName("filterByDepartureTimeRange returns flights across selected date interval")
+    void filterByDepartureTimeRange_returnsFlightsAcrossSelectedDateInterval() {
         List<Flight> input = List.of(f1, f2, f3, f4);
         ZonedDateTime start = baseDate.plusHours(9);
-        ZonedDateTime end = baseDate.plusHours(12);
+        ZonedDateTime end = baseDate.plusDays(1).plusHours(12);
 
         List<Flight> result = controller.filterByDepartureTimeRange(input, start, end);
 
-        assertEquals(3, result.size());
+        assertEquals(4, result.size());
         assertEquals("FI100", result.get(0).getFlightNumber());
-        assertEquals("FI200", result.get(1).getFlightNumber());
-        assertEquals("FI201", result.get(2).getFlightNumber());
+        assertEquals("FI101", result.get(1).getFlightNumber());
+        assertEquals("FI200", result.get(2).getFlightNumber());
+        assertEquals("FI201", result.get(3).getFlightNumber());
     }
 
     // Same-day range should include whole selected day even if times differ.
