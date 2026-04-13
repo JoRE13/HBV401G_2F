@@ -23,4 +23,6 @@ public interface ReservationRepository {
     List<ReservationItem> findItemsByReservation(String reservationCode);
 
     List<String> findFlightNumbersByReservation(String reservationCode);
+
+    boolean hasSeatAssignment(String reservationCode, String itemId, String flightNumber);
 }
