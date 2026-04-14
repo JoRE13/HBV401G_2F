@@ -21,9 +21,11 @@ This gives Team T one stable place to call flight search + booking operations.
 ### Search
 
 - `searchFlights(String departureCode, String arrivalCode, ZonedDateTime date)`
+- `searchFlights(String departureCode, String arrivalCode, ZonedDateTime date, int minAvailableSeats)`
 - `searchByDepartureAirport(String airportCode, ZonedDateTime date)`
 - `filterByDepartureTimeRange(List<Flight> flights, ZonedDateTime start, ZonedDateTime end)`
 - `findConnectingItineraries(String fromCode, String toCode, ZonedDateTime date)`
+- `getAvailableSeatCount(String flightNumber)`
 
 ### Booking
 
@@ -41,6 +43,9 @@ This gives Team T one stable place to call flight search + booking operations.
 - Search returns only flights with status:
   - `SCHEDULED`
   - `DELAYED`
+- Team T can request only flights with enough seats by using:
+  - `searchFlights(..., minAvailableSeats)`
+  - Example: if group size is 5, use `minAvailableSeats = 5`
 - `searchFlights(...)` rejects null/blank airport codes and past dates.
 - Seat IDs must be in format `S<number>` and within flight capacity.
   - Example: `S12`
@@ -63,6 +68,7 @@ Team T should handle those exceptions and map them to user-facing messages.
 ## 5) Minimal usage flow (happy path)
 
 1. Search flights.
+   - If searching for groups, use `searchFlights(..., minAvailableSeats)`.
 2. Build itinerary from selected flights.
 3. `createReservation(itinerary)` -> get `reservationCode`.
 4. For each traveler: `addPassenger(reservationCode, passenger)` -> get `itemId`.

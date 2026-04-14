@@ -19,6 +19,8 @@ public interface FlightRepository {
 
     List<Flight> findArrivingFlights(String airportCode);
 
+    int findAvailableSeatCount(String flightNumber);
+
     void save(Flight flight);
 
     void update(Flight flight);

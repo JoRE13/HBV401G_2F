@@ -59,6 +59,11 @@ public class MockFlightRepository implements FlightRepository {
     }
 
     @Override
+    public int findAvailableSeatCount(String flightNumber) {
+        throw unsupported();
+    }
+
+    @Override
     public void save(Flight flight) {
         throw unsupported();
     }

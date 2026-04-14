@@ -52,6 +52,14 @@ public class FlightComponentFacade {
         return flightController.searchFlights(departureCode, arrivalCode, date);
     }
 
+    public List<Flight> searchFlights(
+            String departureCode,
+            String arrivalCode,
+            ZonedDateTime date,
+            int minAvailableSeats) {
+        return flightController.searchFlights(departureCode, arrivalCode, date, minAvailableSeats);
+    }
+
     public List<Flight> searchByDepartureAirport(String airportCode, ZonedDateTime date) {
         return flightController.searchByDepartureAirport(airportCode, date);
     }
@@ -62,6 +70,10 @@ public class FlightComponentFacade {
 
     public List<Itinerary> findConnectingItineraries(String fromCode, String toCode, ZonedDateTime date) {
         return flightController.findConnectingItineraries(fromCode, toCode, date);
+    }
+
+    public int getAvailableSeatCount(String flightNumber) {
+        return flightController.getAvailableSeatCount(flightNumber);
     }
 
     // Booking API

@@ -76,6 +76,15 @@ public class InMemoryFlightRepository implements FlightRepository {
     }
 
     @Override
+    public int findAvailableSeatCount(String flightNumber) {
+        Flight flight = findByFlightNumber(flightNumber);
+        if (flight == null) {
+            throw new IllegalArgumentException("Flight not found: " + flightNumber);
+        }
+        return flight.getAvailableSeatCount();
+    }
+
+    @Override
     public void save(Flight flight) {
         if (findByFlightNumber(flight.getFlightNumber()) != null) {
             throw new IllegalArgumentException("Flight already exists");
