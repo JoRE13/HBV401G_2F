@@ -53,6 +53,11 @@ public class EmptyFlightRepositoryMock implements FlightRepository {
     }
 
     @Override
+    public int findAvailableSeatCount(String flightNumber) {
+        return 0;
+    }
+
+    @Override
     public void save(Flight flight) {
         // Intentionally no-op: this mock always simulates empty storage.
     }

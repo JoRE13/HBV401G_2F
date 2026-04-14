@@ -169,6 +169,32 @@ public class JdbcFlightRepository implements FlightRepository {
     }
 
     @Override
+    public int findAvailableSeatCount(String flightNumber) {
+        String sql = """
+                SELECT GREATEST(f.capacity - COALESCE(booked.booked_count, 0), 0) AS available_seats
+                FROM flights f
+                LEFT JOIN (
+                    SELECT flight_number, COUNT(*) AS booked_count
+                    FROM reservation_item_flights
+                    GROUP BY flight_number
+                ) booked ON booked.flight_number = f.flight_number
+                WHERE f.flight_number = ?
+                """;
+        try (Connection connection = connectionFactory.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, flightNumber);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (!resultSet.next()) {
+                    throw new IllegalArgumentException("Flight not found: " + flightNumber);
+                }
+                return resultSet.getInt("available_seats");
+            }
+        } catch (SQLException e) {
+            throw dataAccess("findAvailableSeatCount", e);
+        }
+    }
+
+    @Override
     public void save(Flight flight) {
         airportRepository.save(flight.getDepartureAirport());
         airportRepository.save(flight.getArrivalAirport());

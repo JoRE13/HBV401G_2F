@@ -74,6 +74,11 @@ Production instance:
 FlightComponentFacade facade = FlightComponentFacade.createProduction();
 ```
 
+Useful Team T calls for availability-based behavior:
+
+- `searchFlights(departureCode, arrivalCode, date, minAvailableSeats)`
+- `getAvailableSeatCount(flightNumber)`
+
 Detailed contract and behavior notes are documented here:
 
 - `docs/team_t_integration_contract.md`
@@ -90,7 +95,7 @@ Detailed contract and behavior notes are documented here:
 ## Booking/search rules currently enforced
 
 - Search returns only flights with status `SCHEDULED` or `DELAYED`
+- Group-size search is supported via `minAvailableSeats`
 - Seat ID must be `S<number>` and within flight capacity
 - Same seat cannot be assigned twice on same flight
 - Reservation can only be confirmed when every passenger has a seat assignment on every leg
-

@@ -56,11 +56,30 @@ public class FlightController {
         return filterBookableFlights(candidates);
     }
 
+    public List<Flight> searchFlights(
+            String departureCode,
+            String arrivalCode,
+            ZonedDateTime date,
+            int minAvailableSeats) {
+        if (minAvailableSeats < 1) {
+            throw new IllegalArgumentException("minAvailableSeats must be at least 1");
+        }
+        List<Flight> candidates = searchFlights(departureCode, arrivalCode, date);
+        return filterByMinimumAvailableSeats(candidates, minAvailableSeats);
+    }
+
     public List<Flight> searchByDepartureAirport(
             String airportCode,
             ZonedDateTime date) {
         List<Flight> candidates = flightRepository.findByDepartureAirportAndDate(airportCode, date);
         return filterBookableFlights(candidates);
+    }
+
+    public int getAvailableSeatCount(String flightNumber) {
+        if (flightNumber == null || flightNumber.isBlank()) {
+            throw new IllegalArgumentException("flightNumber cannot be null or blank");
+        }
+        return flightRepository.findAvailableSeatCount(flightNumber);
     }
 
     public List<Flight> filterByDepartureTimeRange(
@@ -187,6 +206,17 @@ public class FlightController {
         List<Flight> filtered = new ArrayList<>();
         for (Flight flight : flights) {
             if (isBookableForSearch(flight)) {
+                filtered.add(flight);
+            }
+        }
+        return filtered;
+    }
+
+    private List<Flight> filterByMinimumAvailableSeats(List<Flight> flights, int minAvailableSeats) {
+        List<Flight> filtered = new ArrayList<>();
+        for (Flight flight : flights) {
+            int availableSeats = flightRepository.findAvailableSeatCount(flight.getFlightNumber());
+            if (availableSeats >= minAvailableSeats) {
                 filtered.add(flight);
             }
         }
