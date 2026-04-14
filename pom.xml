@@ -12,6 +12,9 @@
     <maven.compiler.target>17</maven.compiler.target>
     <junit.version>6.0.3</junit.version>
     <postgresql.version>42.7.4</postgresql.version>
+    <!-- javafx uppestning -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <javafx.version>21</javafx.version>
   </properties>
 
   <dependencies>
@@ -27,6 +30,17 @@
       <version>${postgresql.version}</version>
       <scope>runtime</scope>
     </dependency>
+    <!-- javafx -->
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+      <version>${javafx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-fxml</artifactId>
+      <version>${javafx.version}</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -35,6 +49,24 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.2.5</version>
+      </plugin>
+      <!-- JavaFX keyrsla -->
+      <plugin>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-maven-plugin</artifactId>
+        <version>0.0.8</version>
+        <executions>
+          <execution>
+            <!-- Default configuration for running with: mvn clean javafx:run -->
+            <id>default-cli</id>
+            <configuration>
+              <mainClass>airline.ui.MainApp</mainClass>
+              <options>
+                <option>--enable-native-access=javafx.graphics</option>
+              </options>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
