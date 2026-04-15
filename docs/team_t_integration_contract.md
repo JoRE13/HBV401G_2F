@@ -86,3 +86,29 @@ Team T should handle those exceptions and map them to user-facing messages.
   - `AIRLINE_DB_URL`
   - `AIRLINE_DB_USER`
   - `AIRLINE_DB_PASSWORD`
+
+### Team T setup commands (Windows PowerShell)
+
+Run from project root:
+
+```powershell
+# Create DB once
+psql -U postgres -c "CREATE DATABASE airline;"
+
+# Apply schema and seed
+psql -U postgres -d airline -f src/main/resources/db/schema.sql
+psql -U postgres -d airline -f src/main/resources/db/seed.sql
+
+# Set env vars for current terminal
+$env:AIRLINE_DB_URL="jdbc:postgresql://localhost:5432/airline"
+$env:AIRLINE_DB_USER="postgres"
+$env:AIRLINE_DB_PASSWORD="postgres"
+```
+
+Quick connectivity check:
+
+```powershell
+Test-NetConnection localhost -Port 5432
+```
+
+Expected result: `TcpTestSucceeded : True`

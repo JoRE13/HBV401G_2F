@@ -48,3 +48,44 @@ ON CONFLICT (flight_number) DO UPDATE SET
     departure_airport_code = EXCLUDED.departure_airport_code,
     arrival_airport_code = EXCLUDED.arrival_airport_code,
     airplane_type = EXCLUDED.airplane_type;
+
+-- Demo scenario possible presentation:
+-- FI001 is intentionally configured with low capacity, and some seats are already reserved.
+-- This lets us demonstrate group-size filtering and "flight fills up" behavior.
+UPDATE flights
+SET capacity = 5
+WHERE flight_number = 'FI001';
+
+INSERT INTO passengers (email, full_name, phone, nationality, date_of_birth) VALUES
+    ('demo.passenger1@teamf.is', 'Demo Passenger One', '+354-555-0101', 'Icelandic', '1990-05-10'),
+    ('demo.passenger2@teamf.is', 'Demo Passenger Two', '+354-555-0102', 'Icelandic', '1992-08-21')
+ON CONFLICT (email) DO UPDATE SET
+    full_name = EXCLUDED.full_name,
+    phone = EXCLUDED.phone,
+    nationality = EXCLUDED.nationality,
+    date_of_birth = EXCLUDED.date_of_birth;
+
+INSERT INTO reservations (reservation_code, created_at, status, total_price) VALUES
+    ('DEMO-LOW-SEATS', '2027-06-01 10:00:00+00', 'CONFIRMED', 258.00)
+ON CONFLICT (reservation_code) DO UPDATE SET
+    created_at = EXCLUDED.created_at,
+    status = EXCLUDED.status,
+    total_price = EXCLUDED.total_price;
+
+INSERT INTO reservation_flights (reservation_code, flight_number) VALUES
+    ('DEMO-LOW-SEATS', 'FI001')
+ON CONFLICT (reservation_code, flight_number) DO NOTHING;
+
+INSERT INTO reservation_items (item_id, reservation_code, passenger_email, price_paid) VALUES
+    ('ITEM-DEMO-1', 'DEMO-LOW-SEATS', 'demo.passenger1@teamf.is', 129.00),
+    ('ITEM-DEMO-2', 'DEMO-LOW-SEATS', 'demo.passenger2@teamf.is', 129.00)
+ON CONFLICT (item_id) DO UPDATE SET
+    reservation_code = EXCLUDED.reservation_code,
+    passenger_email = EXCLUDED.passenger_email,
+    price_paid = EXCLUDED.price_paid;
+
+INSERT INTO reservation_item_flights (item_id, flight_number, seat_id) VALUES
+    ('ITEM-DEMO-1', 'FI001', 'S1'),
+    ('ITEM-DEMO-2', 'FI001', 'S2')
+ON CONFLICT (item_id, flight_number) DO UPDATE SET
+    seat_id = EXCLUDED.seat_id;

@@ -7,7 +7,7 @@
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Spinner?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -27,10 +27,10 @@
                 </padding>
 
                 <Label text="From:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                <TextField fx:id="fromTextField" prefWidth="180" promptText="KEF" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                <ComboBox fx:id="fromComboBox" prefWidth="180" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
                 <Label text="To:" GridPane.columnIndex="2" GridPane.rowIndex="0" />
-                <TextField fx:id="toTextField" prefWidth="180" promptText="LHR" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                <ComboBox fx:id="toComboBox" prefWidth="180" GridPane.columnIndex="3" GridPane.rowIndex="0" />
 
                 <Label text="Date from:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
                 <DatePicker fx:id="fromDatePicker" GridPane.columnIndex="1" GridPane.rowIndex="1" />
@@ -40,6 +40,9 @@
 
                 <Label text="Sort by:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
                 <ComboBox fx:id="sortComboBox" prefWidth="180" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                <Label text="Passengers:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                <Spinner fx:id="passengerCountSpinner" prefWidth="180" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
                 <CheckBox fx:id="connectingFlightsCheckBox" text="Allow connecting flights" GridPane.columnIndex="2" GridPane.rowIndex="2" />
 
@@ -51,6 +54,7 @@
                <ColumnConstraints />
             </columnConstraints>
             <rowConstraints>
+               <RowConstraints />
                <RowConstraints />
                <RowConstraints />
                <RowConstraints />
@@ -67,7 +71,7 @@
         </VBox>
     </center>
    <bottom>
-      <Button alignment="CENTER" mnemonicParsing="false" prefHeight="53.0" prefWidth="118.0" style="-fx-background-color: #bdbdbd; -fx-text-fill: black;" text="Book Flight" textAlignment="RIGHT" BorderPane.alignment="CENTER">
+      <Button alignment="CENTER" mnemonicParsing="false" onAction="#handleBookFlight" prefHeight="53.0" prefWidth="118.0" style="-fx-background-color: #bdbdbd; -fx-text-fill: black;" text="Book Flight" textAlignment="RIGHT" BorderPane.alignment="CENTER">
          <font>
             <Font size="16.0" />
          </font>

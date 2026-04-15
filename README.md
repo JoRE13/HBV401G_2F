@@ -1,4 +1,4 @@
-# Team F: Flight Search Component (HBV401G)
+# Team F: Flight Search Component
 
 This repository contains Team F's flight search and booking component for the travel portal project.
 
@@ -49,6 +49,8 @@ Notes:
 
 - `seed.sql` is idempotent (safe to re-run).
 - Seed data currently includes Icelandic airports only.
+- If `psql` is not recognized on Windows, use the full setup guide:
+  - `docs/local_setup_windows.md`
 
 ## Quick verification
 
@@ -82,6 +84,37 @@ Useful Team T calls for availability-based behavior:
 Detailed contract and behavior notes are documented here:
 
 - `docs/team_t_integration_contract.md`
+
+### Team T quick setup (Windows PowerShell)
+
+Run these commands from the project root:
+
+```powershell
+# 1) Create database once
+psql -U postgres -c "CREATE DATABASE airline;"
+
+# 2) Load schema + seed
+psql -U postgres -d airline -f src/main/resources/db/schema.sql
+psql -U postgres -d airline -f src/main/resources/db/seed.sql
+
+# 3) Set connection variables for this terminal session
+$env:AIRLINE_DB_URL="jdbc:postgresql://localhost:5432/airline"
+$env:AIRLINE_DB_USER="postgres"
+$env:AIRLINE_DB_PASSWORD="postgres"
+
+# 4) Run app (UI)
+mvn javafx:run
+```
+
+If Team T is using code integration only (no UI), they can call:
+
+```java
+FlightComponentFacade facade = FlightComponentFacade.createProduction();
+```
+
+For a complete Windows setup flow (including full `psql.exe` path usage), see:
+
+- `docs/local_setup_windows.md`
 
 ## Reservation flow (happy path)
 
