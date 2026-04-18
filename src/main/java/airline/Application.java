@@ -16,7 +16,7 @@ import airline.repository.ReservationRepository;
  * Production bootstrap for the Flight Search component.
  *
  * This class wires JDBC repositories and controllers in one place so
- * external consumers (for example Team T) can obtain a ready-to-use component.
+ * external consumers (for Team T) can obtain a ready-to-use component.
  */
 public final class Application {
     private Application() {
@@ -75,6 +75,8 @@ public final class Application {
 
     /**
      * Builds production repositories/controllers backed by PostgreSQL.
+     *
+     * Connection settings are read from environment variables in ConnectionFactory.
      */
     public static Components createProductionComponents() {
         ConnectionFactory connectionFactory = ConnectionFactory.fromEnvironment();

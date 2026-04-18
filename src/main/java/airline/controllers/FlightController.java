@@ -12,13 +12,31 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * Controller for flight search and flight management use cases.
+ *
+ * The controller validates incoming input and delegates storage operations to
+ * {@link FlightRepository}. Search methods return only bookable flights
+ * (scheduled or delayed).
+ */
 public class FlightController {
     private final FlightRepository flightRepository;
 
+    /**
+     * Creates a controller backed by the in-memory repository.
+     *
+     * This constructor is convenient for local/manual usage. For production and
+     * tests, prefer dependency injection through FlightController(FlightRepository).
+     */
     public FlightController() {
         this(new InMemoryFlightRepository());
     }
 
+    /**
+     * Creates a controller with an explicit repository dependency.
+     *
+     * @param flightRepository repository used for flight queries and persistence
+     */
     public FlightController(FlightRepository flightRepository) {
         if (flightRepository == null) {
             throw new IllegalArgumentException("flightRepository cannot be null");
@@ -26,17 +44,25 @@ public class FlightController {
         this.flightRepository = flightRepository;
     }
 
-    // get departing and arriving flights
-
+    /**
+     * Returns flights that depart from the given airport code.
+     */
     public List<Flight> getDepartingFlights(String airportCode) {
         return flightRepository.findDepartingFlights(airportCode);
     }
 
+    /**
+     * Returns flights that arrive at the given airport code.
+     */
     public List<Flight> getArrivingFlights(String airportCode) {
         return flightRepository.findArrivingFlights(airportCode);
     }
 
-    // search methods
+    /**
+     * Searches flights by route and departure date.
+     *
+     * The result contains only bookable flights (scheduled or delayed).
+     */
     public List<Flight> searchFlights(
             String departureCode,
             String arrivalCode,
@@ -56,6 +82,9 @@ public class FlightController {
         return filterBookableFlights(candidates);
     }
 
+    /**
+     * Route/date search with a minimum seat availability constraint.
+     */
     public List<Flight> searchFlights(
             String departureCode,
             String arrivalCode,
@@ -68,6 +97,9 @@ public class FlightController {
         return filterByMinimumAvailableSeats(candidates, minAvailableSeats);
     }
 
+    /**
+     * Searches bookable flights by departure airport and date.
+     */
     public List<Flight> searchByDepartureAirport(
             String airportCode,
             ZonedDateTime date) {
@@ -75,6 +107,9 @@ public class FlightController {
         return filterBookableFlights(candidates);
     }
 
+    /**
+     * Returns currently available seat count for a specific flight.
+     */
     public int getAvailableSeatCount(String flightNumber) {
         if (flightNumber == null || flightNumber.isBlank()) {
             throw new IllegalArgumentException("flightNumber cannot be null or blank");
@@ -82,6 +117,12 @@ public class FlightController {
         return flightRepository.findAvailableSeatCount(flightNumber);
     }
 
+    /**
+     * Filters flights by departure day range.
+     *
+     * The range is inclusive by date (start day through end day). Internally it
+     * is implemented as [start-at-00:00, end+1day-at-00:00).
+     */
     public List<Flight> filterByDepartureTimeRange(
             List<Flight> inputFlights,
             ZonedDateTime start,
@@ -113,11 +154,19 @@ public class FlightController {
         return filterResult;
     }
 
+    /**
+     * Sorts flights by base price in ascending order.
+     *
+     * Note: this mutates the provided list.
+     */
     public List<Flight> sortByPrice(List<Flight> flights) {
         flights.sort(Comparator.comparingDouble(Flight::getBasePrice));
         return flights;
     }
 
+    /**
+     * Finds two-leg connecting itineraries for a given route.
+     */
     public List<Itinerary> findConnectingItineraries(
             String fromCode,
             String toCode,
@@ -160,19 +209,30 @@ public class FlightController {
         return result;
     }
 
-    // Flug-valkostir
+    /**
+     * Persists a new flight.
+     */
     public void addFlight(Flight flight) {
         flightRepository.save(flight);
     }
 
+    /**
+     * Persists updates to an existing flight.
+     */
     public void updateFlight(Flight flight) {
         flightRepository.update(flight);
     }
 
+    /**
+     * Deletes a flight by flight number.
+     */
     public void removeFlight(String flightNumber) {
         flightRepository.delete(flightNumber);
     }
 
+    /**
+     * Cancels a flight by setting its status to cancelled and saving the change.
+     */
     public void cancelFlight(String flightNumber) {
         Flight flight = flightRepository.findByFlightNumber(flightNumber);
         if (flight != null) {
@@ -184,6 +244,9 @@ public class FlightController {
         }
     }
 
+    /**
+     * Reschedules a flight and persists the updated departure/arrival times.
+     */
     public void rescheduleFlight(
             String flightNumber,
             ZonedDateTime newDepartureTime,
