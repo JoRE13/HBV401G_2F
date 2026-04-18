@@ -41,6 +41,10 @@ public class ReservationController {
         this.flightRepository = flightRepository;
     }
 
+    /**
+     * Creates a pending reservation for a selected itinerary and links all
+     * itinerary flight legs to the reservation.
+     */
     public Reservation createReservation(Itinerary itinerary) {
         if (itinerary == null) {
             throw new IllegalArgumentException("itinerary cannot be null");
@@ -59,6 +63,10 @@ public class ReservationController {
         return reservation;
     }
 
+    /**
+     * Adds one passenger to an existing pending reservation and creates the
+     * matching reservation item.
+     */
     public ReservationItem addPassenger(String reservationCode, Passenger passenger) {
         if (reservationCode == null || reservationCode.isBlank()) {
             throw new IllegalArgumentException("reservationCode cannot be null or blank");
@@ -99,6 +107,9 @@ public class ReservationController {
         return item;
     }
 
+    /**
+     * Assigns (or reassigns) a seat for one passenger item on one flight leg.
+     */
     public void assignSeat(String reservationCode, String itemId, String flightNumber, String seatId) {
         if (itemId == null || itemId.isBlank()) {
             throw new IllegalArgumentException("itemId cannot be null or blank");
@@ -115,6 +126,12 @@ public class ReservationController {
         reservationRepository.assignSeat(reservationCode, itemId, flightNumber, normalizedSeatId);
     }
 
+    /**
+     * Confirms a reservation.
+     *
+     * All passengers must have seat assignments on all linked flight legs before
+     * confirmation is allowed.
+     */
     public void confirmReservation(String reservationCode) {
         Reservation reservation = requireReservation(reservationCode);
         requirePending(reservation, "confirm reservation");
@@ -147,6 +164,9 @@ public class ReservationController {
         reservationRepository.update(reservation);
     }
 
+    /**
+     * Cancels a pending reservation.
+     */
     public void cancelReservation(String reservationCode) {
         Reservation reservation = requireReservation(reservationCode);
         requirePending(reservation, "cancel reservation");
@@ -154,6 +174,9 @@ public class ReservationController {
         reservationRepository.update(reservation);
     }
 
+    /**
+     * Convenience wrapper for changing a seat assignment.
+     */
     public void changeSeat(String reservationCode, String itemId, String flightNumber, String newSeatId) {
         if (newSeatId == null || newSeatId.isBlank()) {
             throw new IllegalArgumentException("newSeatId cannot be null or blank");
@@ -161,6 +184,11 @@ public class ReservationController {
         assignSeat(reservationCode, itemId, flightNumber, newSeatId);
     }
 
+    /**
+     * Recomputes and persists reservation total from reservation items.
+     *
+     * @return updated total price
+     */
     public double computeTotal(String reservationCode) {
         Reservation reservation = requireReservation(reservationCode);
         List<ReservationItem> items = reservationRepository.findItemsByReservation(reservationCode);
@@ -173,6 +201,9 @@ public class ReservationController {
         return total;
     }
 
+    /**
+     * Returns all reservations that include a given flight number.
+     */
     public List<Reservation> viewReservationsByFlight(String flightNumber) {
         if (flightNumber == null || flightNumber.isBlank()) {
             throw new IllegalArgumentException("flightNumber cannot be null or blank");

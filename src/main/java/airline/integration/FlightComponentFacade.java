@@ -13,7 +13,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 /**
- * Stable integration entrypoint for external consumers (for example Team T).
+ * Stable integration entrypoint for external consumers (for Team T).
  *
  * Team T should call this facade instead of reaching into repositories or
  * controller internals directly.
@@ -46,12 +46,16 @@ public class FlightComponentFacade {
         );
     }
 
-    // Search API
-
+    /**
+     * Searches flights by route and departure date.
+     */
     public List<Flight> searchFlights(String departureCode, String arrivalCode, ZonedDateTime date) {
         return flightController.searchFlights(departureCode, arrivalCode, date);
     }
 
+    /**
+     * Route/date flight search with minimum availability requirement.
+     */
     public List<Flight> searchFlights(
             String departureCode,
             String arrivalCode,
@@ -60,52 +64,86 @@ public class FlightComponentFacade {
         return flightController.searchFlights(departureCode, arrivalCode, date, minAvailableSeats);
     }
 
+    /**
+     * Searches by departure airport and date.
+     */
     public List<Flight> searchByDepartureAirport(String airportCode, ZonedDateTime date) {
         return flightController.searchByDepartureAirport(airportCode, date);
     }
 
+    /**
+     * Filters a list of flights by an inclusive day range.
+     */
     public List<Flight> filterByDepartureTimeRange(List<Flight> flights, ZonedDateTime start, ZonedDateTime end) {
         return flightController.filterByDepartureTimeRange(flights, start, end);
     }
 
+    /**
+     * Finds connecting itineraries (currently two-leg itineraries).
+     */
     public List<Itinerary> findConnectingItineraries(String fromCode, String toCode, ZonedDateTime date) {
         return flightController.findConnectingItineraries(fromCode, toCode, date);
     }
 
+    /**
+     * Returns currently available seats for a flight.
+     */
     public int getAvailableSeatCount(String flightNumber) {
         return flightController.getAvailableSeatCount(flightNumber);
     }
 
-    // Booking API
-
+    /**
+     * Creates a reservation for the given itinerary.
+     */
     public Reservation createReservation(Itinerary itinerary) {
         return reservationController.createReservation(itinerary);
     }
 
+    /**
+     * Adds one passenger to an existing reservation.
+     */
     public ReservationItem addPassenger(String reservationCode, Passenger passenger) {
         return reservationController.addPassenger(reservationCode, passenger);
     }
 
+    /**
+     * Assigns seat for a passenger item on a flight leg.
+     */
     public void assignSeat(String reservationCode, String itemId, String flightNumber, String seatId) {
         reservationController.assignSeat(reservationCode, itemId, flightNumber, seatId);
     }
 
+    /**
+     * Changes seat assignment for a passenger item on a flight leg.
+     */
     public void changeSeat(String reservationCode, String itemId, String flightNumber, String newSeatId) {
         reservationController.changeSeat(reservationCode, itemId, flightNumber, newSeatId);
     }
 
+    /**
+     * Confirms reservation after validation checks pass.
+     */
     public void confirmReservation(String reservationCode) {
         reservationController.confirmReservation(reservationCode);
     }
 
+    /**
+     * Cancels a reservation.
+     */
     public void cancelReservation(String reservationCode) {
         reservationController.cancelReservation(reservationCode);
     }
 
+    /**
+     * Recomputes reservation total from reservation items.
+     */
     public double computeTotal(String reservationCode) {
         return reservationController.computeTotal(reservationCode);
     }
 
+    /**
+     * Lists reservations linked to a specific flight.
+     */
     public List<Reservation> viewReservationsByFlight(String flightNumber) {
         return reservationController.viewReservationsByFlight(flightNumber);
     }
