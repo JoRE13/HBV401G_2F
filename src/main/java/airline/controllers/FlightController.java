@@ -15,8 +15,8 @@ import java.util.List;
 /**
  * Controller for flight search and flight management use cases.
  *
- * The controller validates incoming input and delegates storage operations to
- * {@link FlightRepository}. Search methods return only bookable flights
+ * The controller validates incoming input and delegates storage operations to FlightRepository. 
+ * Search methods return only bookable flights
  * (scheduled or delayed).
  */
 public class FlightController {

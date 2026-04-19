@@ -104,11 +104,3 @@ $env:AIRLINE_DB_URL="jdbc:postgresql://localhost:5432/airline"
 $env:AIRLINE_DB_USER="postgres"
 $env:AIRLINE_DB_PASSWORD="postgres"
 ```
-
-Quick connectivity check:
-
-```powershell
-Test-NetConnection localhost -Port 5432
-```
-
-Expected result: `TcpTestSucceeded : True`
