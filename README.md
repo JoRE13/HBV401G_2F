@@ -49,8 +49,6 @@ Notes:
 
 - `seed.sql` is idempotent (safe to re-run).
 - Seed data currently includes Icelandic airports only.
-- If `psql` is not recognized on Windows, use the full setup guide:
-  - `docs/local_setup_windows.md`
 
 ## Quick verification
 
@@ -112,9 +110,6 @@ If Team T is using code integration only (no UI), they can call:
 FlightComponentFacade facade = FlightComponentFacade.createProduction();
 ```
 
-For a complete Windows setup flow (including full `psql.exe` path usage), see:
-
-- `docs/local_setup_windows.md`
 
 ## Reservation flow (happy path)
 
