@@ -7,8 +7,8 @@ import java.sql.SQLException;
 /**
  * Creates JDBC connections for the application's repositories.
  *
- * <p>Environment variables:
- * AIRLINE_DB_URL, AIRLINE_DB_USER, AIRLINE_DB_PASSWORD.</p>
+ * Environment variables:
+ * AIRLINE_DB_URL, AIRLINE_DB_USER, AIRLINE_DB_PASSWORD.
  */
 public class ConnectionFactory {
     private final String url;
@@ -28,6 +28,7 @@ public class ConnectionFactory {
     }
 
     public static ConnectionFactory fromEnvironment() {
+        // Sja default values fyrir local keyrslu ef env vars vantar.
         return new ConnectionFactory(
                 env("AIRLINE_DB_URL", "jdbc:postgresql://localhost:5432/airline"),
                 env("AIRLINE_DB_USER", "postgres"),
@@ -36,10 +37,12 @@ public class ConnectionFactory {
     }
 
     public Connection getConnection() throws SQLException {
+        // Ollum JDBC repos er veitt connection i gegnum sama factory.
         return DriverManager.getConnection(url, user, password);
     }
 
     private static String env(String key, String fallback) {
+        // Tekur env value ef til er, annars fallback.
         String value = System.getenv(key);
         return (value == null || value.isBlank()) ? fallback : value;
     }

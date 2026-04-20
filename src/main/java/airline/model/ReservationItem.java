@@ -1,10 +1,12 @@
 package airline.model;
 
 public class ReservationItem {
+    // Eitt item er einn farthi i einni reservation.
     private String itemId;
     private double pricePaid;
     private String passengerEmail;
 
+    // Constructor fyrir reservation item sem tengist passenger med email.
     public ReservationItem(
             String itemId,
             double pricePaid,

@@ -26,6 +26,7 @@ public class JdbcAirportRepository implements AirportRepository {
 
     @Override
     public void save(Airport airport) {
+        // Upsert: setur inn nyjan airport eða uppfaerir ef kodi er til.
         String sql = """
                 INSERT INTO airports (airport_code, name, city, country)
                 VALUES (?, ?, ?, ?)
@@ -48,6 +49,7 @@ public class JdbcAirportRepository implements AirportRepository {
 
     @Override
     public Airport findByCode(String code) {
+        // Skilar null ef airport finnst ekki.
         String sql = "SELECT airport_code, name, city, country FROM airports WHERE airport_code = ?";
         try (Connection connection = connectionFactory.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -80,6 +82,7 @@ public class JdbcAirportRepository implements AirportRepository {
     }
 
     private Airport mapAirport(ResultSet resultSet) throws SQLException {
+        // Breytir DB row i domain object.
         return new Airport(
                 resultSet.getString("airport_code"),
                 resultSet.getString("name"),

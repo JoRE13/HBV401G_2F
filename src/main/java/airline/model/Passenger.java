@@ -3,6 +3,7 @@ package airline.model;
 import java.util.Date;
 
 public class Passenger {
+    // Identity + contact info fyrir farthega.
     private String fullName;
     private String email;
     private String phone;
@@ -62,11 +63,13 @@ public class Passenger {
     }
 
     public void updateContactInfo(String email, String phone){
+        // Notad ef farthegi vill breyta netfangi/sima eftir skraningu.
         this.email = email;
         this.phone = phone;
     }
 
     public boolean validateDetails(){
+        // Einfald grunnvalidering: athugar bara ad lykilsvid se ekki tom.
         if (fullName == null || fullName.isEmpty()){
             return false;
         }

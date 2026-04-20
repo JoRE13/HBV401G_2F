@@ -17,9 +17,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * PostgreSQL-backed implementation of {@link FlightRepository} using JDBC.
+ * PostgreSQL-backed implementation of FlightRepository using JDBC.
  */
 public class JdbcFlightRepository implements FlightRepository {
+    // Grunnselect sem joinar airports svo mapFlight hafi allt i einu resultsetti.
     private static final String SELECT_BASE = """
             SELECT
                 f.flight_number,
@@ -170,6 +171,7 @@ public class JdbcFlightRepository implements FlightRepository {
 
     @Override
     public int findAvailableSeatCount(String flightNumber) {
+        // Availability reiknast ur DB: capacity - fjoldi seat assignments.
         String sql = """
                 SELECT GREATEST(f.capacity - COALESCE(booked.booked_count, 0), 0) AS available_seats
                 FROM flights f
@@ -196,6 +198,7 @@ public class JdbcFlightRepository implements FlightRepository {
 
     @Override
     public void save(Flight flight) {
+        // Tryggjum ad airports seu til adur en flight row er inserted.
         airportRepository.save(flight.getDepartureAirport());
         airportRepository.save(flight.getArrivalAirport());
 
@@ -227,6 +230,7 @@ public class JdbcFlightRepository implements FlightRepository {
 
     @Override
     public void update(Flight flight) {
+        // Sama regla i update: airports eru upsertud fyrst.
         airportRepository.save(flight.getDepartureAirport());
         airportRepository.save(flight.getArrivalAirport());
 
@@ -278,6 +282,7 @@ public class JdbcFlightRepository implements FlightRepository {
     }
 
     private void bindFlight(PreparedStatement statement, Flight flight) throws SQLException {
+        // Placeholder rod i SQL insert: 1..10.
         statement.setString(1, flight.getFlightNumber());
         statement.setTimestamp(2, Timestamp.from(flight.getDepartureDateTime().toInstant()));
         statement.setTimestamp(3, Timestamp.from(flight.getArrivalDateTime().toInstant()));
@@ -299,6 +304,7 @@ public class JdbcFlightRepository implements FlightRepository {
     }
 
     private Flight mapFlight(ResultSet resultSet) throws SQLException {
+        // DB timestamp er normaliserad i UTC fyrir samraemda domain hegdun.
         int capacity = resultSet.getInt("capacity");
         Airport departureAirport = new Airport(
                 resultSet.getString("dep_airport_code"),
