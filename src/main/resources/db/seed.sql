@@ -49,7 +49,7 @@ ON CONFLICT (flight_number) DO UPDATE SET
     arrival_airport_code = EXCLUDED.arrival_airport_code,
     airplane_type = EXCLUDED.airplane_type;
 
--- Demo scenario possible presentation:
+-- Demo scenario for a possible presentation:
 -- FI001 is intentionally configured with low capacity, and some seats are already reserved.
 -- This lets us demonstrate group-size filtering and "flight fills up" behavior.
 UPDATE flights

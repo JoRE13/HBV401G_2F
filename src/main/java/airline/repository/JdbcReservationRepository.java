@@ -152,6 +152,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public void assignSeat(String reservationCode, String itemId, String flightNumber, String seatId) {
+        // Upsert seat assignment fyrir item+flight: insert i fyrsta skipti, update vid breytingu.
         String sql = """
                 INSERT INTO reservation_item_flights (item_id, flight_number, seat_id)
                 SELECT ri.item_id, rf.flight_number, ?
@@ -239,6 +240,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public boolean hasSeatAssignment(String reservationCode, String itemId, String flightNumber) {
+        // Nota EXISTS-like query til ad stadfesta seat assignment fyrir confirm flow.
         String sql = """
                 SELECT 1
                 FROM reservation_item_flights rif
@@ -264,6 +266,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     private void bindReservation(PreparedStatement statement, Reservation reservation, boolean forUpdate)
             throws SQLException {
+        // forUpdate segir hvada parameter-rod gildir: INSERT vs UPDATE.
         Timestamp createdAt = new Timestamp(reservation.getCreatedAt().getTime());
         if (!forUpdate) {
             statement.setString(1, reservation.getReservationCode());
@@ -279,6 +282,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     private Reservation mapReservation(ResultSet resultSet) throws SQLException {
+        // Breytir reservations row i domain object med enum status.
         ReservationStatus status = ReservationStatus.valueOf(resultSet.getString("status"));
         return new Reservation(
                 resultSet.getString("reservation_code"),

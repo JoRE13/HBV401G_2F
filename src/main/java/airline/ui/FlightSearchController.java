@@ -32,10 +32,12 @@ import java.util.UUID;
 
 public class FlightSearchController {
 
+    // UI notar production wiring beint i þessari demo utgafu.
     private final Application.Components components = Application.createProductionComponents();
     private final FlightController flightController = components.getFlightController();
     private final ReservationController reservationController = components.getReservationController();
     private final AirportRepository airportRepository = components.getAirportRepository();
+    // Key: textalinan sem birttist i listanum, Value: underlying direct flight.
     private final Map<String, Flight> directFlightsByResultLine = new HashMap<>();
 
     @FXML
@@ -64,6 +66,7 @@ public class FlightSearchController {
 
     @FXML
     public void initialize() {
+        // Fylla drop-down lista ur DB.
         loadAirportOptions();
 
         sortComboBox.setItems(FXCollections.observableArrayList(
@@ -76,6 +79,7 @@ public class FlightSearchController {
 
         sortComboBox.setValue("Price");
 
+        // Skynsamleg defaults fyrir fyrsta search.
         fromDatePicker.setValue(LocalDate.now());
         toDatePicker.setValue(LocalDate.now().plusDays(7));
         passengerCountSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 20, 1));
@@ -93,6 +97,7 @@ public class FlightSearchController {
         String sortBy = sortComboBox.getValue();
         boolean allowConnectingFlights = connectingFlightsCheckBox.isSelected();
 
+        // Grunnvalidering i UI adur en controller/repository er kallad.
         if (from == null || to == null) {
             resultsListView.setItems(FXCollections.observableArrayList(
                     "Please choose both airports."
@@ -134,6 +139,7 @@ public class FlightSearchController {
             return;
         }
 
+        // Bokanlegt bara fyrir direct flight rows (ekki textual itinerary row).
         Flight selectedFlight = directFlightsByResultLine.get(selectedLine);
         if (selectedFlight == null) {
             resultsListView.setItems(FXCollections.observableArrayList(
@@ -145,6 +151,7 @@ public class FlightSearchController {
         int passengerCount = passengerCountSpinner.getValue();
         String flightNumber = selectedFlight.getFlightNumber();
 
+        // UI check fyrst svo notandi fai strax skilabod.
         int availableBefore = flightController.getAvailableSeatCount(flightNumber);
         if (availableBefore < passengerCount) {
             resultsListView.setItems(FXCollections.observableArrayList(
@@ -163,6 +170,7 @@ public class FlightSearchController {
 
             Reservation reservation = reservationController.createReservation(itinerary);
 
+            // Bua til demo passengers i samraemi vid valinn passengerCount.
             for (int i = 1; i <= passengerCount; i++) {
                 Passenger passenger = new Passenger(
                         "Demo Passenger " + i,
@@ -205,6 +213,7 @@ public class FlightSearchController {
             ZonedDateTime startDateTime = fromDate.atStartOfDay(zone);
             ZonedDateTime endDateTime = toDate.atStartOfDay(zone);
 
+            // Search pipeline: route/date (+ seat threshold) -> date-range filter.
             List<Flight> flights = flightController.searchFlights(from, to, startDateTime, passengerCount);
 
             flights = flightController.filterByDepartureTimeRange(flights, startDateTime, endDateTime);
@@ -212,6 +221,7 @@ public class FlightSearchController {
             Map<String, Integer> availableSeatsByFlight = loadAvailableSeatCounts(flights);
             directFlightsByResultLine.clear();
 
+            // Sort val i UI er mapad i mismunandi comparatora.
             if ("Price".equals(sortBy)) {
                 flights = flightController.sortByPrice(flights);
             } else if ("Duration".equals(sortBy)) {
@@ -229,6 +239,7 @@ public class FlightSearchController {
 
             List<String> results = new ArrayList<>();
 
+            // Vista tengingu milli birtrar textalinu og underlying Flight fyrir booking takka.
             for (Flight flight : flights) {
                 int availableSeats = availableSeatsByFlight.getOrDefault(flight.getFlightNumber(), 0);
                 String row = formatFlight(flight, availableSeats);
@@ -286,6 +297,7 @@ public class FlightSearchController {
     }
 
     private Map<String, Integer> loadAvailableSeatCounts(List<Flight> flights) {
+        // Saetafjoldi lesinn ur controller/repository fyrir hverja nidurstodu.
         Map<String, Integer> availableSeatsByFlight = new HashMap<>();
         for (Flight flight : flights) {
             int available = flightController.getAvailableSeatCount(flight.getFlightNumber());
@@ -315,6 +327,7 @@ public class FlightSearchController {
     }
 
     private void loadAirportOptions() {
+        // Combo boxes fylltar med airport codum ur airports toflu.
         List<Airport> airports = airportRepository.findAll();
         List<String> airportCodes = new ArrayList<>();
         for (Airport airport : airports) {
@@ -339,6 +352,7 @@ public class FlightSearchController {
     }
 
     private void assignFirstAvailableSeat(String reservationCode, String itemId, Flight flight) {
+        // Reynir S1..Sn i rod thar til seat assignment tekst.
         RuntimeException lastSeatError = null;
         for (int seatNumber = 1; seatNumber <= flight.getCapacity(); seatNumber++) {
             String seatId = "S" + seatNumber;

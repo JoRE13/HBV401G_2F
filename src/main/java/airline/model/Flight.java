@@ -113,6 +113,7 @@ public class Flight {
     public void reschedule(
             ZonedDateTime departureDateTime,
             ZonedDateTime arrivalDateTime) {
+        // Faerum baeda timastimpla og endurreiknum duration samstundis.
         this.departureDateTime = departureDateTime;
         this.arrivalDateTime = arrivalDateTime;
 
@@ -124,6 +125,7 @@ public class Flight {
     }
 
     public int getAvailableSeatCount() {
+        // Telur lausu saetin ut fra seat-listanum i minni.
         int count = 0;
         for (Seat seat : seats) {
             if (seat.isAvailable()) {
@@ -134,6 +136,7 @@ public class Flight {
     }
 
     public List<Seat> listAvailableSeats() {
+        // Skilar nyjum lista af seat objects sem eru laus.
         List<Seat> available = new ArrayList<>();
         for (Seat seat : seats) {
             if (seat.isAvailable()) {
@@ -144,6 +147,7 @@ public class Flight {
     }
 
     public boolean isDirectTo(Airport arrivalAirport) {
+        // Vardveitum null-safe samanburd a airport codum.
         if (arrivalAirport == null) {
             return false;
         }
@@ -156,6 +160,7 @@ public class Flight {
     }
 
     public double calculatePrice(int numPassengers) {
+        // Grunnverdlagning: engir afslattir/aukagjold i þessari utgafu.
         return basePrice * numPassengers;
     }
 

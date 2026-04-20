@@ -3,6 +3,7 @@ package airline.model;
 import java.util.Date;
 
 public class Reservation {
+    // Grunnuppl. um bokun: kodi, stofntimi, stada og heildarverd.
     private String reservationCode;
     private Date createdAt;
     private ReservationStatus status;
@@ -16,6 +17,7 @@ public class Reservation {
             double totalPrice){
         this.reservationCode = reservationCode;
         this.createdAt = createdAt;
+        // Ef status er ekki gefin inn byrjar bokun sem PENDING.
         this.status = (status == null) ? ReservationStatus.PENDING : status;
         this.totalPrice = totalPrice;
     }
@@ -38,6 +40,7 @@ public class Reservation {
     }
 
     public void setTotalPrice(double totalPrice) {
+        // Uppfaert i controller eftir ad passenger/item hefur breyst.
         this.totalPrice = totalPrice;
     }
 

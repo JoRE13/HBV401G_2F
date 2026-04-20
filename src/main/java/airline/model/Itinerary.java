@@ -3,6 +3,7 @@ package airline.model;
 import java.util.List;
 
 public class Itinerary {
+    // Itinerary geymir leg listann + tolur (duration/price).
     private String itineraryId;
     private int totalDuration;
     private double totalPrice;
@@ -38,10 +39,12 @@ public class Itinerary {
 
     //methods
     public void addLeg(Flight flight){
+        // Bætir vid einum legg i ferdina.
         legs.add(flight);
     }
 
     public int computeTotalDuration(){
+        // Reiknum aftur fra grunni til ad forðast stale gildi.
         totalDuration = 0;
 
         for(Flight flight : legs){
@@ -53,6 +56,7 @@ public class Itinerary {
     }
 
     public double computeTotalPrice(){
+        // Sama regla fyrir verd: summa yfir alla leggi.
         totalPrice = 0;
 
         for (Flight flight : legs) {

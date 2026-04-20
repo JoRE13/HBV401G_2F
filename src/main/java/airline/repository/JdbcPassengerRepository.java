@@ -25,6 +25,7 @@ public class JdbcPassengerRepository implements PassengerRepository {
 
     @Override
     public void save(Passenger passenger) {
+        // Upsert a passenger med email sem natural key.
         String sql = """
                 INSERT INTO passengers (full_name, email, phone, nationality, date_of_birth)
                 VALUES (?, ?, ?, ?, ?)
@@ -49,6 +50,7 @@ public class JdbcPassengerRepository implements PassengerRepository {
 
     @Override
     public Passenger findByEmail(String email) {
+        // Email er PK, thannig leit er einfaldlega 0 eða 1 nidurstada.
         String sql = """
                 SELECT full_name, email, phone, nationality, date_of_birth
                 FROM passengers
