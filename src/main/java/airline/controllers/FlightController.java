@@ -98,6 +98,48 @@ public class FlightController {
     }
 
     /**
+     * Searches flights by arrival airport, departure airport and daterange
+     *
+     * The result contains only bookable flights (scheduled or delayed).
+     */
+    public List<Flight> searchFlightsInRange(String departureCode, String arrivalCode, ZonedDateTime start, ZonedDateTime end){
+        ZoneId zone = ZoneId.of("UTC");
+        if (departureCode == null || departureCode.isBlank()) {
+            throw new IllegalArgumentException("departureCode cannot be null or blank");
+        }
+        if (arrivalCode == null || arrivalCode.isBlank()) {
+            throw new IllegalArgumentException("arrivalCode cannot be null or blank");
+        }
+        if (start == null || end == null) {
+            throw new IllegalArgumentException("start and end cannot be null");
+        }
+        if (start.toLocalDate().isAfter(end.toLocalDate())) {
+            throw new IllegalArgumentException("start cannot be after end");
+        }
+        if (start.toLocalDate().isBefore(ZonedDateTime.now(zone).toLocalDate()) || end.toLocalDate().isBefore(ZonedDateTime.now(zone).toLocalDate())){
+            throw new IllegalArgumentException("start and end cannot be in the past");
+        }
+        List<Flight> candidates = flightRepository.findByRouteAndDateRange(
+                departureCode,
+                arrivalCode,
+                start,
+                end.toLocalDate().plusDays(1).atStartOfDay(end.getZone())
+        );
+        return filterBookableFlights(candidates);
+    }
+
+    /**
+     * Route/daterange search with a minimum seat availability constraint.
+     */
+    public List<Flight> searchFlightsInRange(String departureCode, String arrivalCode, ZonedDateTime start, ZonedDateTime end, int minAvailableSeats){
+        if (minAvailableSeats < 1) {
+            throw new IllegalArgumentException("minAvailableSeats must be at least 1");
+        }
+        List<Flight> candidates = searchFlightsInRange(departureCode, arrivalCode, start, end);
+        return filterByMinimumAvailableSeats(candidates, minAvailableSeats);
+    }
+
+    /**
      * Searches bookable flights by departure airport and date.
      */
     public List<Flight> searchByDepartureAirport(
@@ -171,11 +213,59 @@ public class FlightController {
             String fromCode,
             String toCode,
             ZonedDateTime date) {
+        return findConnectingItinerariesInRange(fromCode, toCode, date, date);
+    }
+
+    /**
+     * Finds two-leg connecting itineraries for a given route and departure day range.
+     */
+    public List<Itinerary> findConnectingItinerariesInRange(
+            String fromCode,
+            String toCode,
+            ZonedDateTime start,
+            ZonedDateTime end) {
+        return findConnectingItinerariesInRange(fromCode, toCode, start, end, 1);
+    }
+
+    /**
+     * Finds two-leg connecting itineraries for a given route and departure day range,
+     * applying a minimum availability requirement to each leg.
+     */
+    public List<Itinerary> findConnectingItinerariesInRange(
+            String fromCode,
+            String toCode,
+            ZonedDateTime start,
+            ZonedDateTime end,
+            int minAvailableSeats) {
+        ZoneId zone = ZoneId.of("UTC");
+        if (fromCode == null || fromCode.isBlank()) {
+            throw new IllegalArgumentException("fromCode cannot be null or blank");
+        }
+        if (toCode == null || toCode.isBlank()) {
+            throw new IllegalArgumentException("toCode cannot be null or blank");
+        }
+        if (start == null || end == null) {
+            throw new IllegalArgumentException("start and end cannot be null");
+        }
+        if (start.toLocalDate().isAfter(end.toLocalDate())) {
+            throw new IllegalArgumentException("start cannot be after end");
+        }
+        if (start.toLocalDate().isBefore(ZonedDateTime.now(zone).toLocalDate())) {
+            throw new IllegalArgumentException("dates cannot be in the past");
+        }
+        if (minAvailableSeats < 1) {
+            throw new IllegalArgumentException("minAvailableSeats must be at least 1");
+        }
+
         List<Itinerary> result = new ArrayList<>();
         List<Flight> flights = flightRepository.findAll();
+        List<Flight> firstLegCandidates = filterByDepartureTimeRange(flights, start, end);
 
-        for (Flight f1 : flights) {
+        for (Flight f1 : firstLegCandidates) {
             if (!isBookableForSearch(f1)) {
+                continue;
+            }
+            if (flightRepository.findAvailableSeatCount(f1.getFlightNumber()) < minAvailableSeats) {
                 continue;
             }
             if (!f1.getDepartureAirport().getAirportCode().equals(fromCode))
@@ -183,6 +273,9 @@ public class FlightController {
 
             for (Flight f2 : flights) {
                 if (!isBookableForSearch(f2)) {
+                    continue;
+                }
+                if (flightRepository.findAvailableSeatCount(f2.getFlightNumber()) < minAvailableSeats) {
                     continue;
                 }
                 if (f1.getArrivalAirport().getAirportCode()

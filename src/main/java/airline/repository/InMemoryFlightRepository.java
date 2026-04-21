@@ -42,6 +42,25 @@ public class InMemoryFlightRepository implements FlightRepository {
     }
 
     @Override
+    public List<Flight> findByRouteAndDateRange(
+            String departureCode,
+            String arrivalCode,
+            ZonedDateTime start,
+            ZonedDateTime end) {
+        List<Flight> result = new ArrayList<>();
+        for (Flight flight : flights) {
+            ZonedDateTime departure = flight.getDepartureDateTime();
+            if (flight.getDepartureAirport().getAirportCode().equals(departureCode)
+                    && flight.getArrivalAirport().getAirportCode().equals(arrivalCode)
+                    && !departure.isBefore(start)
+                    && departure.isBefore(end)) {
+                result.add(flight);
+            }
+        }
+        return result;
+    }
+
+    @Override
     public List<Flight> findByDepartureAirportAndDate(String airportCode, ZonedDateTime date) {
         List<Flight> result = new ArrayList<>();
         for (Flight flight : flights) {

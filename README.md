@@ -1,6 +1,6 @@
 # Team F: Flight Search Component
 
-This repository contains Team F's flight search and booking component for the travel portal project.
+Repository for Team F's flight search and booking component for the travel portal project.
 
 ## What this component does
 
@@ -45,11 +45,6 @@ psql -U postgres -d airline -f src/main/resources/db/schema.sql
 psql -U postgres -d airline -f src/main/resources/db/seed.sql
 ```
 
-Notes:
-
-- `seed.sql` is idempotent (safe to re-run).
-- Seed data currently includes Icelandic airports only.
-
 ## Quick verification
 
 Run tests:
@@ -77,6 +72,7 @@ FlightComponentFacade facade = FlightComponentFacade.createProduction();
 Useful Team T calls for availability-based behavior:
 
 - `searchFlights(departureCode, arrivalCode, date, minAvailableSeats)`
+- `searchFlightsInRange(departureCode, arrivalCode, startDate, endDate, minAvailableSeats)`
 - `getAvailableSeatCount(flightNumber)`
 
 Detailed contract and behavior notes are documented here:
@@ -109,7 +105,6 @@ If Team T is using code integration only (no UI), they can call:
 ```java
 FlightComponentFacade facade = FlightComponentFacade.createProduction();
 ```
-
 
 ## Reservation flow (happy path)
 

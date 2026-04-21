@@ -38,6 +38,15 @@ public class EmptyFlightRepositoryMock implements FlightRepository {
     }
 
     @Override
+    public List<Flight> findByRouteAndDateRange(
+            String departureCode,
+            String arrivalCode,
+            ZonedDateTime start,
+            ZonedDateTime end) {
+        return new ArrayList<>();
+    }
+
+    @Override
     public List<Flight> findByDepartureAirportAndDate(String airportCode, ZonedDateTime date) {
         return new ArrayList<>();
     }

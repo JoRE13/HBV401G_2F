@@ -22,9 +22,13 @@ This gives Team T one stable place to call flight search + booking operations.
 
 - `searchFlights(String departureCode, String arrivalCode, ZonedDateTime date)`
 - `searchFlights(String departureCode, String arrivalCode, ZonedDateTime date, int minAvailableSeats)`
+- `searchFlightsInRange(String departureCode, String arrivalCode, ZonedDateTime start, ZonedDateTime end)`
+- `searchFlightsInRange(String departureCode, String arrivalCode, ZonedDateTime start, ZonedDateTime end, int minAvailableSeats)`
 - `searchByDepartureAirport(String airportCode, ZonedDateTime date)`
 - `filterByDepartureTimeRange(List<Flight> flights, ZonedDateTime start, ZonedDateTime end)`
 - `findConnectingItineraries(String fromCode, String toCode, ZonedDateTime date)`
+- `findConnectingItinerariesInRange(String fromCode, String toCode, ZonedDateTime start, ZonedDateTime end)`
+- `findConnectingItinerariesInRange(String fromCode, String toCode, ZonedDateTime start, ZonedDateTime end, int minAvailableSeats)`
 - `getAvailableSeatCount(String flightNumber)`
 
 ### Booking
@@ -45,8 +49,11 @@ This gives Team T one stable place to call flight search + booking operations.
   - `DELAYED`
 - Team T can request only flights with enough seats by using:
   - `searchFlights(..., minAvailableSeats)`
+  - `searchFlightsInRange(..., minAvailableSeats)`
+  - `findConnectingItinerariesInRange(..., minAvailableSeats)`
   - Example: if group size is 5, use `minAvailableSeats = 5`
 - `searchFlights(...)` rejects null/blank airport codes and past dates.
+- `searchFlightsInRange(...)` rejects null/blank airport codes, null dates, past dates, and start dates after end dates.
 - Seat IDs must be in format `S<number>` and within flight capacity.
   - Example: `S12`
   - If a flight has capacity 72, valid range is `S1` to `S72`.
@@ -69,6 +76,8 @@ Team T should handle those exceptions and map them to user-facing messages.
 
 1. Search flights.
    - If searching for groups, use `searchFlights(..., minAvailableSeats)`.
+   - If searching across multiple days, use `searchFlightsInRange(...)`.
+   - If searching for connecting flights across multiple days, use `findConnectingItinerariesInRange(...)`.
 2. Build itinerary from selected flights.
 3. `createReservation(itinerary)` -> get `reservationCode`.
 4. For each traveler: `addPassenger(reservationCode, passenger)` -> get `itemId`.
