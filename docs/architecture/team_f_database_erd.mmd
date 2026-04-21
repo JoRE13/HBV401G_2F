@@ -1,0 +1,65 @@
+erDiagram
+    AIRPORTS {
+        VARCHAR airport_code PK
+        VARCHAR name
+        VARCHAR city
+        VARCHAR country
+    }
+
+    FLIGHTS {
+        VARCHAR flight_number PK
+        TIMESTAMPTZ departure_at
+        TIMESTAMPTZ arrival_at
+        INTEGER duration_minutes
+        NUMERIC base_price
+        VARCHAR status
+        INTEGER capacity
+        VARCHAR departure_airport_code FK
+        VARCHAR arrival_airport_code FK
+        VARCHAR airplane_type
+    }
+
+    PASSENGERS {
+        VARCHAR email PK
+        VARCHAR full_name
+        VARCHAR phone
+        VARCHAR nationality
+        DATE date_of_birth
+    }
+
+    RESERVATIONS {
+        VARCHAR reservation_code PK
+        TIMESTAMPTZ created_at
+        VARCHAR status
+        NUMERIC total_price
+    }
+
+    RESERVATION_ITEMS {
+        VARCHAR item_id PK
+        VARCHAR reservation_code FK
+        VARCHAR passenger_email FK
+        NUMERIC price_paid
+    }
+
+    RESERVATION_FLIGHTS {
+        VARCHAR reservation_code PK,FK
+        VARCHAR flight_number PK,FK
+    }
+
+    RESERVATION_ITEM_FLIGHTS {
+        VARCHAR item_id PK,FK
+        VARCHAR flight_number PK,FK
+        VARCHAR seat_id
+    }
+
+    AIRPORTS ||--o{ FLIGHTS : "departure_airport_code"
+    AIRPORTS ||--o{ FLIGHTS : "arrival_airport_code"
+
+    RESERVATIONS ||--o{ RESERVATION_ITEMS : has
+    PASSENGERS ||--o{ RESERVATION_ITEMS : references
+
+    RESERVATIONS ||--o{ RESERVATION_FLIGHTS : links
+    FLIGHTS ||--o{ RESERVATION_FLIGHTS : included_in
+
+    RESERVATION_ITEMS ||--o{ RESERVATION_ITEM_FLIGHTS : seat_assignment_for
+    FLIGHTS ||--o{ RESERVATION_ITEM_FLIGHTS : assigned_on
