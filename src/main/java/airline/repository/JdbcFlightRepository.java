@@ -70,8 +70,8 @@ public class JdbcFlightRepository implements FlightRepository {
     public List<Flight> findAll() {
         String sql = SELECT_BASE + " ORDER BY f.departure_at";
         try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql);
-             ResultSet resultSet = statement.executeQuery()) {
+                PreparedStatement statement = connection.prepareStatement(sql);
+                ResultSet resultSet = statement.executeQuery()) {
             return mapFlights(resultSet);
         } catch (SQLException e) {
             throw dataAccess("findAll", e);
@@ -82,7 +82,7 @@ public class JdbcFlightRepository implements FlightRepository {
     public Flight findByFlightNumber(String flightNumber) {
         String sql = SELECT_BASE + " WHERE f.flight_number = ?";
         try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+                PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, flightNumber);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
@@ -104,10 +104,34 @@ public class JdbcFlightRepository implements FlightRepository {
                  ORDER BY f.departure_at
                 """;
         try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+                PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, departureCode);
             statement.setString(2, arrivalCode);
             statement.setDate(3, Date.valueOf(date.toLocalDate()));
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return mapFlights(resultSet);
+            }
+        } catch (SQLException e) {
+            throw dataAccess("findByRouteAndDate", e);
+        }
+    }
+
+    @Override
+    public List<Flight> findByRouteAndDateRange(String departureCode, String arrivalCode, ZonedDateTime start,
+            ZonedDateTime end) {
+        String sql = SELECT_BASE + """
+                 WHERE f.departure_airport_code = ?
+                   AND f.arrival_airport_code = ?
+                   AND (f.departure_at AT TIME ZONE 'UTC')::date >= ?
+                   AND (f.departure_at AT TIME ZONE 'UTC')::date < ?
+                 ORDER BY f.departure_at
+                """;
+        try (Connection connection = connectionFactory.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, departureCode);
+            statement.setString(2, arrivalCode);
+            statement.setDate(3, Date.valueOf(start.toLocalDate()));
+            statement.setDate(4, Date.valueOf(end.toLocalDate()));
             try (ResultSet resultSet = statement.executeQuery()) {
                 return mapFlights(resultSet);
             }
@@ -124,7 +148,7 @@ public class JdbcFlightRepository implements FlightRepository {
                  ORDER BY f.departure_at
                 """;
         try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+                PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, airportCode);
             statement.setDate(2, Date.valueOf(date.toLocalDate()));
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -142,7 +166,7 @@ public class JdbcFlightRepository implements FlightRepository {
                  ORDER BY f.departure_at
                 """;
         try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+                PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, airportCode);
             try (ResultSet resultSet = statement.executeQuery()) {
                 return mapFlights(resultSet);
@@ -159,7 +183,7 @@ public class JdbcFlightRepository implements FlightRepository {
                  ORDER BY f.arrival_at
                 """;
         try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+                PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, airportCode);
             try (ResultSet resultSet = statement.executeQuery()) {
                 return mapFlights(resultSet);
@@ -183,7 +207,7 @@ public class JdbcFlightRepository implements FlightRepository {
                 WHERE f.flight_number = ?
                 """;
         try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+                PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, flightNumber);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (!resultSet.next()) {
@@ -217,7 +241,7 @@ public class JdbcFlightRepository implements FlightRepository {
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
         try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+                PreparedStatement statement = connection.prepareStatement(sql)) {
             bindFlight(statement, flight);
             statement.executeUpdate();
         } catch (SQLException e) {
@@ -248,7 +272,7 @@ public class JdbcFlightRepository implements FlightRepository {
                 WHERE flight_number = ?
                 """;
         try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+                PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setTimestamp(1, Timestamp.from(flight.getDepartureDateTime().toInstant()));
             statement.setTimestamp(2, Timestamp.from(flight.getArrivalDateTime().toInstant()));
             statement.setInt(3, flight.getDurationMinutes());
@@ -273,7 +297,7 @@ public class JdbcFlightRepository implements FlightRepository {
     public void delete(String flightNumber) {
         String sql = "DELETE FROM flights WHERE flight_number = ?";
         try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+                PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, flightNumber);
             statement.executeUpdate();
         } catch (SQLException e) {
@@ -310,14 +334,12 @@ public class JdbcFlightRepository implements FlightRepository {
                 resultSet.getString("dep_airport_code"),
                 resultSet.getString("dep_name"),
                 resultSet.getString("dep_city"),
-                resultSet.getString("dep_country")
-        );
+                resultSet.getString("dep_country"));
         Airport arrivalAirport = new Airport(
                 resultSet.getString("arr_airport_code"),
                 resultSet.getString("arr_name"),
                 resultSet.getString("arr_city"),
-                resultSet.getString("arr_country")
-        );
+                resultSet.getString("arr_country"));
         ZonedDateTime departure = resultSet.getTimestamp("departure_at").toInstant().atZone(ZoneId.of("UTC"));
         ZonedDateTime arrival = resultSet.getTimestamp("arrival_at").toInstant().atZone(ZoneId.of("UTC"));
         FlightStatus status = FlightStatus.valueOf(resultSet.getString("status"));
@@ -332,8 +354,7 @@ public class JdbcFlightRepository implements FlightRepository {
                 capacity,
                 arrivalAirport,
                 departureAirport,
-                resultSet.getString("airplane_type")
-        );
+                resultSet.getString("airplane_type"));
     }
 
     private RuntimeException dataAccess(String operation, SQLException e) {

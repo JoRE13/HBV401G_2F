@@ -90,8 +90,7 @@ public final class Application {
         ReservationController reservationController = new ReservationController(
                 reservationRepository,
                 passengerRepository,
-                flightRepository
-        );
+                flightRepository);
 
         return new Components(
                 flightController,
@@ -99,8 +98,7 @@ public final class Application {
                 airportRepository,
                 flightRepository,
                 passengerRepository,
-                reservationRepository
-        );
+                reservationRepository);
     }
 
     /**

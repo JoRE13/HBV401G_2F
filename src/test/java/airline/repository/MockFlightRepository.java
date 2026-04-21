@@ -34,6 +34,15 @@ public class MockFlightRepository implements FlightRepository {
     }
 
     @Override
+    public List<Flight> findByRouteAndDateRange(
+            String departureCode,
+            String arrivalCode,
+            ZonedDateTime start,
+            ZonedDateTime end) {
+        return new ArrayList<>(routeAndDateResponse);
+    }
+
+    @Override
     public List<Flight> findAll() {
         throw unsupported();
     }

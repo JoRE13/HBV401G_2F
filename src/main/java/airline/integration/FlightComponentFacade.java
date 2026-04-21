@@ -42,8 +42,7 @@ public class FlightComponentFacade {
         Application.Components components = Application.createProductionComponents();
         return new FlightComponentFacade(
                 components.getFlightController(),
-                components.getReservationController()
-        );
+                components.getReservationController());
     }
 
     /**
@@ -65,6 +64,26 @@ public class FlightComponentFacade {
     }
 
     /**
+     * Searches flights by route and departure dateRange.
+     */
+    public List<Flight> searchFlightsInRange(String departureCode, String arrivalCode, ZonedDateTime start,
+            ZonedDateTime end) {
+        return flightController.searchFlightsInRange(departureCode, arrivalCode, start, end);
+    }
+
+    /**
+     * Route/date flight search with minimum availability requirement.
+     */
+    public List<Flight> searchFlightsInRange(
+            String departureCode,
+            String arrivalCode,
+            ZonedDateTime start,
+            ZonedDateTime end,
+            int minAvailableSeats) {
+        return flightController.searchFlightsInRange(departureCode, arrivalCode, start, end, minAvailableSeats);
+    }
+
+    /**
      * Searches by departure airport and date.
      */
     public List<Flight> searchByDepartureAirport(String airportCode, ZonedDateTime date) {
@@ -83,6 +102,36 @@ public class FlightComponentFacade {
      */
     public List<Itinerary> findConnectingItineraries(String fromCode, String toCode, ZonedDateTime date) {
         return flightController.findConnectingItineraries(fromCode, toCode, date);
+    }
+
+    /**
+     * Finds connecting itineraries across an inclusive departure day range.
+     */
+    public List<Itinerary> findConnectingItinerariesInRange(
+            String fromCode,
+            String toCode,
+            ZonedDateTime start,
+            ZonedDateTime end) {
+        return flightController.findConnectingItinerariesInRange(fromCode, toCode, start, end);
+    }
+
+    /**
+     * Finds connecting itineraries across an inclusive departure day range with
+     * a minimum availability requirement on each leg.
+     */
+    public List<Itinerary> findConnectingItinerariesInRange(
+            String fromCode,
+            String toCode,
+            ZonedDateTime start,
+            ZonedDateTime end,
+            int minAvailableSeats) {
+        return flightController.findConnectingItinerariesInRange(
+                fromCode,
+                toCode,
+                start,
+                end,
+                minAvailableSeats
+        );
     }
 
     /**

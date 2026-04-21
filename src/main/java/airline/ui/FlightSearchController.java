@@ -74,8 +74,7 @@ public class FlightSearchController {
                 "Duration",
                 "Departure time",
                 "Arrival time",
-                "Available seats"
-        ));
+                "Available seats"));
 
         sortComboBox.setValue("Price");
 
@@ -100,29 +99,25 @@ public class FlightSearchController {
         // Grunnvalidering i UI adur en controller/repository er kallad.
         if (from == null || to == null) {
             resultsListView.setItems(FXCollections.observableArrayList(
-                    "Please choose both airports."
-            ));
+                    "Please choose both airports."));
             return;
         }
 
         if (from.equals(to)) {
             resultsListView.setItems(FXCollections.observableArrayList(
-                    "Departure and arrival airport cannot be the same."
-            ));
+                    "Departure and arrival airport cannot be the same."));
             return;
         }
 
         if (fromDate == null || toDate == null) {
             resultsListView.setItems(FXCollections.observableArrayList(
-                    "Please select both dates."
-            ));
+                    "Please select both dates."));
             return;
         }
 
         if (toDate.isBefore(fromDate)) {
             resultsListView.setItems(FXCollections.observableArrayList(
-                    "\"Date to\" can not be before \"date from\"."
-            ));
+                    "\"Date to\" can not be before \"date from\"."));
             return;
         }
 
@@ -134,8 +129,7 @@ public class FlightSearchController {
         String selectedLine = resultsListView.getSelectionModel().getSelectedItem();
         if (selectedLine == null || selectedLine.isBlank()) {
             resultsListView.setItems(FXCollections.observableArrayList(
-                    "Please select a direct flight result before booking."
-            ));
+                    "Please select a direct flight result before booking."));
             return;
         }
 
@@ -143,8 +137,7 @@ public class FlightSearchController {
         Flight selectedFlight = directFlightsByResultLine.get(selectedLine);
         if (selectedFlight == null) {
             resultsListView.setItems(FXCollections.observableArrayList(
-                    "Selected row is not a direct flight. Please select a direct flight line with a flight number."
-            ));
+                    "Selected row is not a direct flight. Please select a direct flight line with a flight number."));
             return;
         }
 
@@ -155,8 +148,8 @@ public class FlightSearchController {
         int availableBefore = flightController.getAvailableSeatCount(flightNumber);
         if (availableBefore < passengerCount) {
             resultsListView.setItems(FXCollections.observableArrayList(
-                    "Not enough seats for this booking. Requested: " + passengerCount + ", available: " + availableBefore
-            ));
+                    "Not enough seats for this booking. Requested: " + passengerCount + ", available: "
+                            + availableBefore));
             return;
         }
 
@@ -165,8 +158,7 @@ public class FlightSearchController {
                     "UI-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(),
                     0,
                     0.0,
-                    new ArrayList<>(List.of(selectedFlight))
-            );
+                    new ArrayList<>(List.of(selectedFlight)));
 
             Reservation reservation = reservationController.createReservation(itinerary);
 
@@ -177,8 +169,7 @@ public class FlightSearchController {
                         buildDemoEmail(reservation.getReservationCode(), i),
                         "+354-555-0000",
                         "IS",
-                        Date.from(Instant.parse("1990-01-01T00:00:00Z"))
-                );
+                        Date.from(Instant.parse("1990-01-01T00:00:00Z")));
 
                 ReservationItem item = reservationController.addPassenger(reservation.getReservationCode(), passenger);
                 assignFirstAvailableSeat(reservation.getReservationCode(), item.getItemId(), selectedFlight);
@@ -189,8 +180,8 @@ public class FlightSearchController {
             handleSearch();
             resultsListView.getItems().add(
                     0,
-                    "Booked " + passengerCount + " seat(s) on " + flightNumber + " | Reservation: " + reservation.getReservationCode()
-            );
+                    "Booked " + passengerCount + " seat(s) on " + flightNumber + " | Reservation: "
+                            + reservation.getReservationCode());
         } catch (Exception e) {
             String details = e.getMessage();
             if (e.getCause() != null && e.getCause().getMessage() != null) {
@@ -198,14 +189,13 @@ public class FlightSearchController {
             }
             resultsListView.setItems(FXCollections.observableArrayList(
                     "Booking failed.",
-                    details
-            ));
+                    details));
         }
     }
 
     private void searchFlights(String from, String to,
-                LocalDate fromDate, LocalDate toDate, int passengerCount,
-                String sortBy, boolean allowConnectingFlights) {
+            LocalDate fromDate, LocalDate toDate, int passengerCount,
+            String sortBy, boolean allowConnectingFlights) {
 
         try {
             ZoneId zone = ZoneId.of("UTC");
@@ -213,10 +203,8 @@ public class FlightSearchController {
             ZonedDateTime startDateTime = fromDate.atStartOfDay(zone);
             ZonedDateTime endDateTime = toDate.atStartOfDay(zone);
 
-            // Search pipeline: route/date (+ seat threshold) -> date-range filter.
-            List<Flight> flights = flightController.searchFlights(from, to, startDateTime, passengerCount);
-
-            flights = flightController.filterByDepartureTimeRange(flights, startDateTime, endDateTime);
+            List<Flight> flights = flightController.searchFlightsInRange(from, to, startDateTime, endDateTime,
+                    passengerCount);
 
             Map<String, Integer> availableSeatsByFlight = loadAvailableSeatCounts(flights);
             directFlightsByResultLine.clear();
@@ -233,13 +221,13 @@ public class FlightSearchController {
             } else if ("Available seats".equals(sortBy)) {
                 flights.sort((a, b) -> Integer.compare(
                         availableSeatsByFlight.getOrDefault(b.getFlightNumber(), 0),
-                        availableSeatsByFlight.getOrDefault(a.getFlightNumber(), 0)
-                ));
+                        availableSeatsByFlight.getOrDefault(a.getFlightNumber(), 0)));
             }
 
             List<String> results = new ArrayList<>();
 
-            // Vista tengingu milli birtrar textalinu og underlying Flight fyrir booking takka.
+            // Vista tengingu milli birtrar textalinu og underlying Flight fyrir booking
+            // takka.
             for (Flight flight : flights) {
                 int availableSeats = availableSeatsByFlight.getOrDefault(flight.getFlightNumber(), 0);
                 String row = formatFlight(flight, availableSeats);
@@ -248,8 +236,12 @@ public class FlightSearchController {
             }
 
             if (allowConnectingFlights) {
-                List<Itinerary> itineraries =
-                        flightController.findConnectingItineraries(from, to, startDateTime);
+                List<Itinerary> itineraries = flightController.findConnectingItinerariesInRange(
+                        from,
+                        to,
+                        startDateTime,
+                        endDateTime,
+                        passengerCount);
 
                 for (Itinerary itinerary : itineraries) {
                     results.add(formatItinerary(itinerary));
@@ -268,16 +260,14 @@ public class FlightSearchController {
 
             resultsListView.setItems(FXCollections.observableArrayList(
                     "Error while searching flights.",
-                    details
-            ));
+                    details));
         }
     }
 
     private void displayFlights(List<String> flights) {
         if (flights == null || flights.isEmpty()) {
             resultsListView.setItems(FXCollections.observableArrayList(
-                    "No flights found."
-            ));
+                    "No flights found."));
             return;
         }
 
@@ -319,9 +309,17 @@ public class FlightSearchController {
         String from = legs.get(0).getDepartureAirport().getAirportCode();
         String to = legs.get(legs.size() - 1).getArrivalAirport().getAirportCode();
 
+        String route = "";
+        for (int i = 0; i < legs.size(); i++) {
+            route = route + legs.get(i).getDepartureAirport().getAirportCode() + " -> ";
+        }
+        route += legs.get(legs.size() - 1).getArrivalAirport().getAirportCode();
+
         return "Connecting flight"
-                + " | Route: " + from + " -> " + to
+                + " | Route: " + route
                 + " | Itinerary: " + itinerary.getItineraryId()
+                + " | Departure: " + legs.get(0).getDepartureDateTime().toLocalDateTime()
+                + " | Arrival: " + legs.get(legs.size() - 1).getArrivalDateTime().toLocalDateTime()
                 + " | Duration: " + itinerary.getTotalDuration() + " min"
                 + " | Price: " + itinerary.getTotalPrice();
     }
@@ -361,8 +359,7 @@ public class FlightSearchController {
                         reservationCode,
                         itemId,
                         flight.getFlightNumber(),
-                        seatId
-                );
+                        seatId);
                 return;
             } catch (IllegalArgumentException e) {
                 String msg = e.getMessage();
@@ -377,11 +374,9 @@ public class FlightSearchController {
         if (lastSeatError != null) {
             throw new IllegalStateException(
                     "Could not find an available seat on flight " + flight.getFlightNumber(),
-                    lastSeatError
-            );
+                    lastSeatError);
         }
         throw new IllegalStateException(
-                "Could not find an available seat on flight " + flight.getFlightNumber()
-        );
+                "Could not find an available seat on flight " + flight.getFlightNumber());
     }
 }
